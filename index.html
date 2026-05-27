@@ -3,15 +3,10 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>MegaMind AI — мобильная версия | 4 режима сверху</title>
+    <title>MegaMind AI — надёжная генерация | 4 режима</title>
     <script src="https://cdn.jsdelivr.net/npm/brain.js@2.0.0-beta.23/dist/browser.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Fira Code', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Fira Code', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif; }
 
         :root {
             --bg-start: #1a1030;
@@ -29,385 +24,76 @@
             --border-radius: 20px;
         }
 
-        body {
-            background: radial-gradient(circle at 10% 20%, var(--bg-start), var(--bg-end));
-            min-height: 100vh;
-            padding: 10px;
-        }
+        body { background: radial-gradient(circle at 10% 20%, var(--bg-start), var(--bg-end)); min-height: 100vh; padding: 10px; }
+        .app-window { max-width: 1600px; margin: 0 auto; background: var(--panel-bg); backdrop-filter: blur(14px); border-radius: 28px; display: flex; flex-direction: column; overflow: hidden; border: 1px solid var(--accent); box-shadow: 0 30px 60px rgba(0,0,0,0.5); min-height: calc(100vh - 20px); }
 
-        .app-window {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: var(--panel-bg);
-            backdrop-filter: blur(14px);
-            border-radius: 28px;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-            border: 1px solid var(--accent);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-            min-height: calc(100vh - 20px);
-        }
+        /* Мобильная шапка */
+        .mobile-mode-bar { background: rgba(0, 0, 0, 0.5); padding: 10px 12px; border-bottom: 1px solid var(--accent); display: none; }
+        .mode-buttons-row { display: flex; gap: 8px; justify-content: space-around; flex-wrap: wrap; }
+        .mode-btn-mobile { background: #2d235a; padding: 8px 12px; font-size: 0.7rem; cursor: pointer; border-radius: 30px; border: none; color: var(--text-light); font-weight: bold; transition: all 0.2s; flex: 1; text-align: center; min-width: 70px; }
+        .mode-btn-mobile.active { background: var(--accent); color: #1a1a2e; box-shadow: 0 0 8px rgba(168,85,247,0.5); }
+        .mode-btn-mobile:active { transform: scale(0.97); }
 
-        /* ========== МОБИЛЬНАЯ ШАПКА С 4 КНОПКАМИ ========== */
-        .mobile-mode-bar {
-            background: rgba(0, 0, 0, 0.5);
-            padding: 10px 12px;
-            border-bottom: 1px solid var(--accent);
-            display: none;
-        }
+        /* Панели */
+        .training-panel { background: rgba(10, 6, 25, 0.95); border-bottom: 1px solid var(--accent); padding: 14px; display: flex; flex-direction: column; gap: 12px; transition: all 0.3s ease; }
+        .training-panel.desktop { width: 340px; border-right: 1px solid var(--accent); border-bottom: none; overflow-y: auto; }
+        .training-panel.mobile { width: 100%; max-height: 0; padding: 0 14px; overflow: hidden; border-bottom: none; }
+        .training-panel.mobile.open { max-height: 400px; padding: 14px; border-bottom: 1px solid var(--accent); overflow-y: auto; }
+        .toggle-panel-btn { background: var(--accent-dark); width: 100%; text-align: center; padding: 8px; font-size: 0.7rem; border-radius: 30px; margin-top: 5px; display: none; }
 
-        .mode-buttons-row {
-            display: flex;
-            gap: 8px;
-            justify-content: space-around;
-            flex-wrap: wrap;
-        }
+        /* Чат */
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: rgba(5, 10, 20, 0.5); min-width: 0; }
+        .chat-header { padding: 12px 16px; background: rgba(0, 0, 0, 0.4); border-bottom: 1px solid var(--accent); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px; }
+        .chat-header h1 { font-size: 1rem; color: var(--text-light); display: flex; align-items: center; gap: 8px; }
+        .current-mode-badge { background: var(--accent); color: #1a1a2e; padding: 3px 10px; border-radius: 30px; font-size: 0.65rem; font-weight: bold; }
+        .export-buttons { display: flex; gap: 6px; }
+        .export-buttons button, .export-buttons label { background: var(--accent-dark); font-size: 0.6rem; padding: 5px 10px; cursor: pointer; border-radius: 30px; }
 
-        .mode-btn-mobile {
-            background: #2d235a;
-            padding: 8px 12px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            border-radius: 30px;
-            border: none;
-            color: var(--text-light);
-            font-weight: bold;
-            transition: all 0.2s;
-            flex: 1;
-            text-align: center;
-            min-width: 70px;
-        }
-
-        .mode-btn-mobile.active {
-            background: var(--accent);
-            color: #1a1a2e;
-            box-shadow: 0 0 8px rgba(168,85,247,0.5);
-        }
-
-        .mode-btn-mobile:active {
-            transform: scale(0.97);
-        }
-
-        /* ========== ПАНЕЛЬ ОБУЧЕНИЯ (на телефоне скрыта за кнопкой) ========== */
-        .training-panel {
-            background: rgba(10, 6, 25, 0.95);
-            border-bottom: 1px solid var(--accent);
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-            transition: all 0.3s ease;
-        }
-
-        /* Десктопная версия панели */
-        .training-panel.desktop {
-            width: 340px;
-            border-right: 1px solid var(--accent);
-            border-bottom: none;
-            overflow-y: auto;
-        }
-
-        /* Мобильная версия — сворачиваемая */
-        .training-panel.mobile {
-            width: 100%;
-            max-height: 0;
-            padding: 0 14px;
-            overflow: hidden;
-            border-bottom: none;
-        }
-
-        .training-panel.mobile.open {
-            max-height: 400px;
-            padding: 14px;
-            border-bottom: 1px solid var(--accent);
-            overflow-y: auto;
-        }
-
-        .toggle-panel-btn {
-            background: var(--accent-dark);
-            width: 100%;
-            text-align: center;
-            padding: 8px;
-            font-size: 0.7rem;
-            border-radius: 30px;
-            margin-top: 5px;
-            display: none;
-        }
-
-        /* Основная область чата */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: rgba(5, 10, 20, 0.5);
-            min-width: 0;
-        }
-
-        /* Шапка чата */
-        .chat-header {
-            padding: 12px 16px;
-            background: rgba(0, 0, 0, 0.4);
-            border-bottom: 1px solid var(--accent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 8px;
-        }
-
-        .chat-header h1 {
-            font-size: 1rem;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .current-mode-badge {
-            background: var(--accent);
-            color: #1a1a2e;
-            padding: 3px 10px;
-            border-radius: 30px;
-            font-size: 0.65rem;
-            font-weight: bold;
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 6px;
-        }
-
-        .export-buttons button,
-        .export-buttons label {
-            background: var(--accent-dark);
-            font-size: 0.6rem;
-            padding: 5px 10px;
-            cursor: pointer;
-            border-radius: 30px;
-        }
-
-        /* Область сообщений */
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 14px;
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
-
-        .message {
-            display: flex;
-            flex-direction: column;
-            max-width: 90%;
-            animation: fadeIn 0.2s ease;
-        }
-
+        .chat-messages { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 12px; }
+        .message { display: flex; flex-direction: column; max-width: 90%; animation: fadeIn 0.2s ease; }
         .user-msg { align-self: flex-end; }
         .bot-msg { align-self: flex-start; }
+        .msg-bubble { padding: 10px 14px; border-radius: 22px; background: #2d235a; color: var(--text-light); word-break: break-word; font-size: 0.85rem; white-space: pre-wrap; line-height: 1.4; }
+        .user-msg .msg-bubble { background: var(--user-msg-bg); border-bottom-right-radius: 6px; }
+        .bot-msg .msg-bubble { background: var(--bot-msg-bg); border-left: 3px solid var(--accent); }
 
-        .msg-bubble {
-            padding: 10px 14px;
-            border-radius: 22px;
-            background: #2d235a;
-            color: var(--text-light);
-            word-break: break-word;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            line-height: 1.4;
-        }
+        .code-block { background: #0f0a2a; padding: 8px; border-radius: 14px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.7rem; margin-top: 6px; border: 1px solid var(--accent); }
+        .code-block pre { margin: 0; white-space: pre-wrap; color: var(--text-muted); }
 
-        .user-msg .msg-bubble {
-            background: var(--user-msg-bg);
-            border-bottom-right-radius: 6px;
-        }
-
-        .bot-msg .msg-bubble {
-            background: var(--bot-msg-bg);
-            border-left: 3px solid var(--accent);
-        }
-
-        /* Код-блоки */
-        .code-block {
-            background: #0f0a2a;
-            padding: 8px;
-            border-radius: 14px;
-            overflow-x: auto;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.7rem;
-            margin-top: 6px;
-            border: 1px solid var(--accent);
-        }
-
-        .code-block pre {
-            margin: 0;
-            white-space: pre-wrap;
-            color: var(--text-muted);
-        }
-
-        /* Изображения */
         .img-container { margin-top: 8px; }
-        .img-preview {
-            max-width: 100%;
-            max-height: 240px;
-            border-radius: 16px;
-            border: 2px solid var(--accent);
-            cursor: pointer;
-        }
-        .img-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 6px;
-            flex-wrap: wrap;
-        }
-        .img-btn {
-            background: #2d235a;
-            padding: 4px 10px;
-            font-size: 0.6rem;
-            border-radius: 30px;
-            cursor: pointer;
-            border: none;
-            color: var(--text-light);
-        }
+        .img-preview { max-width: 100%; max-height: 280px; border-radius: 16px; border: 2px solid var(--accent); cursor: pointer; }
+        .img-buttons { display: flex; gap: 8px; margin-top: 6px; flex-wrap: wrap; }
+        .img-btn { background: #2d235a; padding: 4px 10px; font-size: 0.6rem; border-radius: 30px; cursor: pointer; border: none; color: var(--text-light); }
 
-        /* Элементы панели */
-        .stats-area, .mode-selector, .add-pair-form {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 10px;
-            border: 1px solid var(--accent);
-        }
+        .stats-area, .mode-selector, .add-pair-form { background: var(--card-bg); border-radius: var(--border-radius); padding: 10px; border: 1px solid var(--accent); }
         .stats-number { font-size: 1.3rem; font-weight: bold; color: var(--accent-light); }
         .stats-label { font-size: 0.6rem; color: var(--text-muted); }
         .mode-selector h3, .add-pair-form h3 { font-size: 0.7rem; margin-bottom: 8px; color: var(--text-muted); }
 
-        .mode-buttons-desktop {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-        .mode-btn-desktop {
-            background: #2d235a;
-            padding: 6px 10px;
-            font-size: 0.65rem;
-            border-radius: 30px;
-            border: none;
-            color: var(--text-light);
-            font-weight: bold;
-            cursor: pointer;
-            flex: 1;
-            text-align: center;
-        }
-        .mode-btn-desktop.active {
-            background: var(--accent);
-            color: #1a1a2e;
-        }
+        .mode-buttons-desktop { display: flex; gap: 8px; flex-wrap: wrap; }
+        .mode-btn-desktop { background: #2d235a; padding: 6px 10px; font-size: 0.65rem; border-radius: 30px; border: none; color: var(--text-light); font-weight: bold; cursor: pointer; flex: 1; text-align: center; }
+        .mode-btn-desktop.active { background: var(--accent); color: #1a1a2e; }
 
         .input-group { margin-bottom: 8px; }
-        .input-group input, .input-group textarea {
-            width: 100%;
-            background: var(--input-bg);
-            border: 1px solid var(--accent);
-            border-radius: 14px;
-            padding: 8px 12px;
-            color: var(--text-light);
-            font-size: 0.75rem;
-        }
+        .input-group input, .input-group textarea { width: 100%; background: var(--input-bg); border: 1px solid var(--accent); border-radius: 14px; padding: 8px 12px; color: var(--text-light); font-size: 0.75rem; }
 
-        button {
-            background: linear-gradient(95deg, var(--accent), var(--accent-dark));
-            border: none;
-            padding: 6px 12px;
-            border-radius: 40px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.7rem;
-        }
+        button { background: linear-gradient(95deg, var(--accent), var(--accent-dark)); border: none; padding: 6px 12px; border-radius: 40px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; font-size: 0.7rem; }
         button:active { transform: scale(0.97); }
-
         .train-btn { width: 100%; }
-        .status-area {
-            background: #0f0a1a;
-            border-radius: var(--border-radius);
-            padding: 6px;
-            font-size: 0.6rem;
-            text-align: center;
-            color: var(--text-muted);
-        }
-        .pairs-list {
-            max-height: 120px;
-            overflow-y: auto;
-            font-size: 0.6rem;
-        }
-        .pair-item {
-            background: #0f0a2a;
-            border-radius: 12px;
-            padding: 5px;
-            margin-bottom: 5px;
-            border-left: 3px solid var(--accent);
-        }
-        .delete-topic {
-            background: #5e2e42;
-            padding: 2px 6px;
-            border-radius: 30px;
-            font-size: 0.5rem;
-            margin-top: 3px;
-        }
+        .status-area { background: #0f0a1a; border-radius: var(--border-radius); padding: 6px; font-size: 0.6rem; text-align: center; color: var(--text-muted); }
+        .pairs-list { max-height: 120px; overflow-y: auto; font-size: 0.6rem; }
+        .pair-item { background: #0f0a2a; border-radius: 12px; padding: 5px; margin-bottom: 5px; border-left: 3px solid var(--accent); }
+        .delete-topic { background: #5e2e42; padding: 2px 6px; border-radius: 30px; font-size: 0.5rem; margin-top: 3px; }
 
-        .input-area {
-            padding: 12px;
-            background: #0f0a1a;
-            display: flex;
-            gap: 8px;
-            border-top: 1px solid var(--accent);
-        }
-        #userInput {
-            flex: 1;
-            background: var(--input-bg);
-            border: 1px solid var(--accent);
-            border-radius: 60px;
-            padding: 10px 16px;
-            color: var(--text-light);
-            font-size: 0.8rem;
-        }
+        .input-area { padding: 12px; background: #0f0a1a; display: flex; gap: 8px; border-top: 1px solid var(--accent); }
+        #userInput { flex: 1; background: var(--input-bg); border: 1px solid var(--accent); border-radius: 60px; padding: 10px 16px; color: var(--text-light); font-size: 0.8rem; }
         #sendBtn { padding: 0 16px; white-space: nowrap; }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 16px;
-            height: 16px;
-            border: 2px solid #fff;
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 6px;
-            vertical-align: middle;
-        }
+        .loading-spinner { display: inline-block; width: 16px; height: 16px; border: 2px solid #fff; border-top-color: var(--accent); border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 6px; vertical-align: middle; }
 
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            justify-content: center;
-            align-items: center;
-        }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); justify-content: center; align-items: center; }
         .modal-content { max-width: 90%; max-height: 90%; border-radius: 20px; border: 2px solid var(--accent); }
-        .close-modal {
-            position: absolute;
-            top: 15px;
-            right: 25px;
-            color: var(--text-muted);
-            font-size: 35px;
-            cursor: pointer;
-        }
+        .close-modal { position: absolute; top: 15px; right: 25px; color: var(--text-muted); font-size: 35px; cursor: pointer; }
 
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
@@ -416,74 +102,27 @@
         ::-webkit-scrollbar-track { background: var(--input-bg); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-        /* ========== ДЕСКТОПНАЯ ВЕРСИЯ (> 768px) ========== */
         @media (min-width: 768px) {
-            .app-window {
-                flex-direction: row;
-                height: calc(100vh - 20px);
-            }
-            .mobile-mode-bar {
-                display: none !important;
-            }
-            .training-panel.desktop {
-                display: flex !important;
-            }
-            .training-panel.mobile {
-                display: none !important;
-            }
-            .toggle-panel-btn {
-                display: none !important;
-            }
-            .mode-buttons-desktop {
-                display: flex !important;
-            }
+            .app-window { flex-direction: row; height: calc(100vh - 20px); }
+            .mobile-mode-bar { display: none !important; }
+            .training-panel.desktop { display: flex !important; }
+            .training-panel.mobile { display: none !important; }
+            .toggle-panel-btn { display: none !important; }
+            .mode-buttons-desktop { display: flex !important; }
         }
 
-        /* ========== МОБИЛЬНАЯ ВЕРСИЯ (< 768px) ========== */
         @media (max-width: 767px) {
-            .training-panel.desktop {
-                display: none !important;
-            }
-            .training-panel.mobile {
-                display: flex !important;
-            }
-            .mobile-mode-bar {
-                display: block !important;
-            }
-            .mode-buttons-desktop {
-                display: none !important;
-            }
-            .toggle-panel-btn {
-                display: block !important;
-            }
-            .chat-header h1 {
-                font-size: 0.85rem;
-            }
-            .current-mode-badge {
-                font-size: 0.55rem;
-                padding: 2px 8px;
-            }
-            .export-buttons button,
-            .export-buttons label {
-                font-size: 0.55rem;
-                padding: 4px 8px;
-            }
-            .msg-bubble {
-                font-size: 0.8rem;
-                padding: 8px 12px;
-            }
-            .code-block {
-                font-size: 0.6rem;
-            }
-            .img-preview {
-                max-height: 180px;
-            }
+            .training-panel.desktop { display: none !important; }
+            .training-panel.mobile { display: flex !important; }
+            .mobile-mode-bar { display: block !important; }
+            .mode-buttons-desktop { display: none !important; }
+            .toggle-panel-btn { display: block !important; }
+            .img-preview { max-height: 200px; }
         }
     </style>
 </head>
 <body>
 <div class="app-window">
-    <!-- Мобильная шапка с 4 кнопками (только на телефоне) -->
     <div class="mobile-mode-bar">
         <div class="mode-buttons-row">
             <button class="mode-btn-mobile" data-mode="text">📝 Текст</button>
@@ -493,16 +132,12 @@
         </div>
     </div>
 
-    <!-- Десктопная панель обучения -->
     <div class="training-panel desktop">
         <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); padding-bottom: 8px;">
             <h2 style="color: var(--text-light); font-size: 0.9rem;">🧠 MegaMind AI</h2>
             <button id="resetDataBtnDesktop" style="background:#4e2c3e;">Сброс</button>
         </div>
-        <div class="stats-area">
-            <div class="stats-number" id="totalAnswersCountDesktop">0</div>
-            <div class="stats-label">всего ответов</div>
-        </div>
+        <div class="stats-area"><div class="stats-number" id="totalAnswersCountDesktop">0</div><div class="stats-label">всего ответов</div></div>
         <div class="mode-selector">
             <h3>🎛️ РЕЖИМЫ</h3>
             <div class="mode-buttons-desktop">
@@ -525,16 +160,12 @@
         <div id="pairsContainerDesktop" class="pairs-list"></div></div>
     </div>
 
-    <!-- Мобильная панель (сворачиваемая) -->
     <div class="training-panel mobile" id="mobilePanel">
         <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); padding-bottom: 6px;">
             <h2 style="color: var(--text-light); font-size: 0.85rem;">🧠 Настройки</h2>
             <button id="resetDataBtnMobile" style="background:#4e2c3e; font-size:0.65rem;">Сброс</button>
         </div>
-        <div class="stats-area">
-            <div class="stats-number" id="totalAnswersCountMobile">0</div>
-            <div class="stats-label">всего ответов</div>
-        </div>
+        <div class="stats-area"><div class="stats-number" id="totalAnswersCountMobile">0</div><div class="stats-label">всего ответов</div></div>
         <div class="add-pair-form">
             <h3>➕ Добавить свой ответ</h3>
             <div class="input-group"><input type="text" id="newQuestionMobile" placeholder="Ключевое слово"></div>
@@ -548,7 +179,6 @@
     </div>
     <button class="toggle-panel-btn" id="togglePanelBtn">📂 Показать настройки</button>
 
-    <!-- Чат -->
     <div class="chat-area">
         <div class="chat-header">
             <h1>🧠 MegaMind AI <span id="currentModeDisplay" class="current-mode-badge">📝 Текст</span></h1>
@@ -570,7 +200,7 @@
             </div>
         </div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Напиши: анекдот, или калькулятор на python..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="Напиши: анекдот, или калькулятор на python, или нарисуй..." autocomplete="off">
             <button id="sendBtn">→</button>
         </div>
     </div>
@@ -590,34 +220,26 @@
     let isTraining = false;
     let mobilePanelOpen = false;
 
-    // Функция обновления режима
     function setMode(mode) {
         currentMode = mode;
-        
-        // Обновляем все кнопки режимов (мобильные и десктопные)
         document.querySelectorAll('.mode-btn-mobile, .mode-btn-desktop').forEach(btn => {
             btn.classList.remove('active');
             if (btn.dataset.mode === mode) btn.classList.add('active');
         });
-        
         let modeText = '';
         if (mode === 'text') modeText = '📝 Текст';
         else if (mode === 'code') modeText = '💻 Код';
         else if (mode === 'imageCanvas') modeText = '🎨 Canvas';
         else if (mode === 'imageAI') modeText = '🤖 AI';
-        
         document.getElementById('currentModeDisplay').innerHTML = modeText;
-        
         const modeStatus = document.getElementById('modeStatusDesktop');
         if (modeStatus) modeStatus.innerHTML = `✅ Режим: ${modeText.toUpperCase()}`;
     }
 
-    // Обработчики кнопок режимов
     document.querySelectorAll('.mode-btn-mobile, .mode-btn-desktop').forEach(btn => {
         btn.addEventListener('click', () => setMode(btn.dataset.mode));
     });
 
-    // Тогглер мобильной панели
     const toggleBtn = document.getElementById('togglePanelBtn');
     const mobilePanel = document.getElementById('mobilePanel');
     if (toggleBtn) {
@@ -637,7 +259,7 @@
     function buildLargeTopics() {
         const topics = [];
         const jokes = [
-            "— Почему программисты путают Хэллоуин и Рождество? Потому что 31 Oct = 25 Dec!",
+            "— Почему программисты путают Хэллоуин и Рождество? 31 Oct = 25 Dec!",
             "Встречаются два программиста: — Слышал, у тебя новая работа? — Да, теперь я пишу код на Python. — А раньше на чём? — На кофе.",
             "Сколько программистов нужно, чтобы заменить лампочку? Ни одного, это аппаратная проблема.",
             "— Доктор, я себя чувствую нейросетью. — Почему? — Обучаюсь на ошибках, но всё равно иногда галлюцинирую."
@@ -745,75 +367,187 @@
         if (result.success && result.code && result.code.length > 20) {
             return { type: "code", data: result.code };
         } else {
-            return { type: "code", data: "```python\ndef factorial(n):\n    return 1 if n <= 1 else n * factorial(n-1)\n```" };
+            return { type: "code", data: "```python\ndef factorial(n):\n    return 1 if n <= 1 else n * factorial(n-1)\n\nprint(factorial(5))  # 120\n```" };
         }
     }
     
-    // ==================== ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ ====================
+    // ==================== ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ (С НАДЁЖНЫМ FALLBACK) ====================
     function getRandomSeed() { return Math.floor(Math.random() * 1000000); }
     function hashCode(str, seed = 0) { let hash = seed; for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; } return Math.abs(hash); }
     function seededRandom(hash, step) { return ((hash + step) % 0x7fffffff) / 0x7fffffff; }
     
-    function generateCanvasImage(description) {
+    // Улучшенная Canvas генерация (более красивые картинки)
+    function generateCanvasImage(description, useFallbackStyle = false) {
         const canvas = document.createElement('canvas');
-        canvas.width = 400;
-        canvas.height = 400;
+        canvas.width = 512;
+        canvas.height = 512;
         const ctx = canvas.getContext('2d');
         const randomSeed = getRandomSeed();
         const hash = hashCode(description, randomSeed);
         const bgHue = (hash % 360);
-        ctx.fillStyle = `hsl(${bgHue}, 60%, 75%)`;
+        
+        // Красивый градиентный фон
+        const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+        grad.addColorStop(0, `hsl(${bgHue}, 65%, 70%)`);
+        grad.addColorStop(1, `hsl(${(bgHue + 60) % 360}, 55%, 60%)`);
+        ctx.fillStyle = grad;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const numShapes = 8 + Math.floor(seededRandom(hash, 100) * 20);
-        for (let i = 0; i < numShapes; i++) {
-            let x = 30 + seededRandom(hash, i * 11) * (canvas.width - 60);
-            let y = 40 + seededRandom(hash, i * 73) * (canvas.height - 80);
-            let size = 15 + seededRandom(hash, i * 43) * 60;
-            const hue = (bgHue + 90 + i * 37) % 360;
-            ctx.fillStyle = `hsl(${hue}, 65%, 60%)`;
+        
+        // Рамка
+        ctx.strokeStyle = `hsl(${bgHue}, 80%, 35%)`;
+        ctx.lineWidth = 6;
+        ctx.strokeRect(15, 15, canvas.width - 30, canvas.height - 30);
+        
+        // Разные типы фигур для разнообразия
+        const shapeTypes = ['circle', 'rect', 'triangle', 'star', 'heart'];
+        const numShapes = 12 + Math.floor(seededRandom(hash, 100) * 25);
+        
+        function drawStar(ctx, cx, cy, outerR, innerR, spikes) {
+            let step = Math.PI / spikes;
             ctx.beginPath();
-            ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+            for (let i = 0; i < spikes * 2; i++) {
+                let r = (i % 2 === 0) ? outerR : innerR;
+                let angle = i * step;
+                let x = cx + r * Math.cos(angle);
+                let y = cy + r * Math.sin(angle);
+                if (i === 0) ctx.moveTo(x, y);
+                else ctx.lineTo(x, y);
+            }
+            ctx.closePath();
+        }
+        
+        function drawHeart(ctx, cx, cy, size) {
+            ctx.beginPath();
+            ctx.moveTo(cx, cy - size/3);
+            ctx.bezierCurveTo(cx - size/2, cy - size/3, cx - size/2, cy + size/3, cx, cy + size/1.5);
+            ctx.bezierCurveTo(cx + size/2, cy + size/3, cx + size/2, cy - size/3, cx, cy - size/3);
+            ctx.closePath();
+        }
+        
+        for (let i = 0; i < numShapes; i++) {
+            const r = seededRandom(hash, i * 257);
+            const shapeType = shapeTypes[Math.floor(r * shapeTypes.length)];
+            let x = 50 + seededRandom(hash, i * 11) * (canvas.width - 100);
+            let y = 60 + seededRandom(hash, i * 73) * (canvas.height - 120);
+            let size = 20 + seededRandom(hash, i * 43) * 70;
+            const hue = (bgHue + 90 + i * 37 + randomSeed) % 360;
+            const fillColor = `hsl(${hue}, 70%, 55%)`;
+            
+            ctx.fillStyle = fillColor;
+            ctx.strokeStyle = `hsl(${hue}, 70%, 40%)`;
+            ctx.lineWidth = 2;
+            
+            switch (shapeType) {
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(x, y, size / 2, 0, Math.PI * 2);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                case 'rect':
+                    ctx.fillRect(x - size/2, y - size/2, size, size);
+                    ctx.strokeRect(x - size/2, y - size/2, size, size);
+                    break;
+                case 'triangle':
+                    ctx.beginPath();
+                    ctx.moveTo(x, y - size/2);
+                    ctx.lineTo(x + size/2, y + size/2);
+                    ctx.lineTo(x - size/2, y + size/2);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                case 'star':
+                    drawStar(ctx, x, y, size/2, size/4, 5);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                case 'heart':
+                    drawHeart(ctx, x, y, size);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+            }
+        }
+        
+        // Текст описания
+        let shortDesc = description.length > 35 ? description.substring(0, 32) + "..." : description;
+        ctx.font = "bold 18px 'Segoe UI'";
+        ctx.fillStyle = "#1a1a2e";
+        ctx.fillText(`✨ "${shortDesc}"`, 25, canvas.height - 25);
+        
+        // Добавляем маленькие звёздочки/точки для украшения
+        ctx.fillStyle = `hsl(${bgHue}, 80%, 65%)`;
+        for (let i = 0; i < 50; i++) {
+            ctx.beginPath();
+            ctx.arc(seededRandom(hash, i*999) * canvas.width, seededRandom(hash, i*777) * canvas.height, 2, 0, Math.PI * 2);
             ctx.fill();
         }
-        let shortDesc = description.length > 25 ? description.substring(0, 22) + "..." : description;
-        ctx.font = "bold 14px 'Segoe UI'";
-        ctx.fillStyle = "#1a1a2e";
-        ctx.fillText(`"${shortDesc}"`, 15, canvas.height - 15);
+        
         return canvas.toDataURL();
     }
     
+    // AI генерация с улучшенными эндпоинтами и таймаутом
     async function generateAIImage(description) {
         let cleanPrompt = description.replace(/^(нарисуй|сгенерируй|создай|изобрази)\s+/i, '').trim();
         if(!cleanPrompt) cleanPrompt = description;
-        try {
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=400&height=400&nologo=true&seed=${getRandomSeed()}`;
-            const response = await fetch(url);
-            if (!response.ok) throw new Error();
-            const blob = await response.blob();
-            return new Promise((resolve) => {
-                const reader = new FileReader();
-                reader.onloadend = () => resolve({ success: true, imageData: reader.result });
-                reader.readAsDataURL(blob);
-            });
-        } catch (error) {
-            return { success: false };
+        
+        // Массив возможных эндпоинтов для резерва
+        const endpoints = [
+            `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=512&height=512&nologo=true&seed=${getRandomSeed()}`,
+            `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt + " high quality detailed")}?width=512&height=512&nologo=true&seed=${getRandomSeed()}`
+        ];
+        
+        for (const url of endpoints) {
+            try {
+                const controller = new AbortController();
+                const timeoutId = setTimeout(() => controller.abort(), 8000); // 8 секунд таймаут
+                
+                const response = await fetch(url, { signal: controller.signal });
+                clearTimeout(timeoutId);
+                
+                if (response.ok) {
+                    const blob = await response.blob();
+                    if (blob.size > 5000) { // Проверка что изображение не пустое
+                        return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onloadend = () => resolve({ success: true, imageData: reader.result });
+                            reader.readAsDataURL(blob);
+                        });
+                    }
+                }
+            } catch (error) {
+                console.log("Pollinations error, trying next endpoint");
+            }
         }
+        return { success: false };
     }
     
+    // Основной обработчик с автоматическим fallback
     async function handleUserQuery(query) {
         if (currentMode === 'text') {
             let answer = getTextResponse(query);
             if (answer) return { type: "text", data: answer };
             return { type: "text", data: "Не понял. Попробуй 'анекдот', 'факт', 'совет'" };
         }
-        else if (currentMode === 'code') return await handleCodeRequest(query);
-        else if (currentMode === 'imageCanvas') return { type: "image", data: generateCanvasImage(query), text: `🎨 "${query}"` };
-        else if (currentMode === 'imageAI') {
-            const result = await generateAIImage(query);
-            if (result.success) return { type: "image", data: result.imageData, text: `🤖 "${query}"` };
-            else return { type: "image", data: generateCanvasImage(query), text: `⚠️ AI ошибка, Canvas: "${query}"` };
+        else if (currentMode === 'code') {
+            return await handleCodeRequest(query);
         }
-        return { type: "text", data: "Выберите режим!" };
+        else if (currentMode === 'imageCanvas') {
+            const imgData = generateCanvasImage(query);
+            return { type: "image", data: imgData, text: `🎨 Художественная генерация (Canvas): "${query}"` };
+        }
+        else if (currentMode === 'imageAI') {
+            // Пытаемся сгенерировать через AI
+            const result = await generateAIImage(query);
+            if (result.success && result.imageData) {
+                return { type: "image", data: result.imageData, text: `🤖 AI сгенерировала: "${query}"` };
+            } else {
+                // Автоматический fallback на Canvas при ошибке AI
+                const imgData = generateCanvasImage(query, true);
+                return { type: "image", data: imgData, text: `🎨 Canvas Art (AI временно недоступен): "${query}"` };
+            }
+        }
+        return { type: "text", data: "Выберите режим работы!" };
     }
     
     // ==================== UI ФУНКЦИИ ====================
@@ -862,7 +596,7 @@
         link.href = data;
         link.download = filename;
         link.click();
-        addSystemMessage(`✅ Сохранено!`);
+        addSystemMessage(`✅ Изображение сохранено!`);
     };
     
     window.openFullImage = function(data) {
@@ -889,15 +623,19 @@
         
         let loadingMsg = document.createElement('div');
         loadingMsg.className = 'message bot-msg';
-        loadingMsg.innerHTML = `<div class="msg-bubble" style="background:#2d235a;"><span>⏳ Обработка...</span><span class="loading-spinner"></span></div>`;
+        loadingMsg.innerHTML = `<div class="msg-bubble" style="background:#2d235a;"><span>🎨 Генерирую...</span><span class="loading-spinner"></span></div>`;
         chatMessagesDiv.appendChild(loadingMsg);
         
         let response = await handleUserQuery(txt);
         loadingMsg.remove();
         
-        if(response.type === "image") addMessage(response.text, false, response.data);
-        else if (response.type === "code") addMessage(response.data, false, null, true);
-        else addMessage(response.data, false);
+        if(response.type === "image") {
+            addMessage(response.text, false, response.data);
+        } else if (response.type === "code") {
+            addMessage(response.data, false, null, true);
+        } else {
+            addMessage(response.data, false);
+        }
     }
     
     function addOrUpdateTopic(q,a) {
@@ -944,11 +682,11 @@
         currentTopics = buildLargeTopics();
     }
     
-    function resetToDefault() { currentTopics = buildLargeTopics(); saveTopicsToStorage(); renderAllPairsLists(); trainNeuralNet(true); addSystemMessage("🔄 Сброшено!"); }
-    function exportData() { let blob = new Blob([JSON.stringify({topics: currentTopics}, null, 2)], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "megamind_backup.json"; a.click(); addSystemMessage("💾 Экспорт!"); }
-    function importData(file) { let reader = new FileReader(); reader.onload = e => { try { let imp = JSON.parse(e.target.result); if(imp.topics) { currentTopics = imp.topics; saveTopicsToStorage(); renderAllPairsLists(); trainNeuralNet(true); addSystemMessage("📂 Импорт!"); } } catch(err) { addSystemMessage("❌ Ошибка"); } }; reader.readAsText(file); }
+    function resetToDefault() { currentTopics = buildLargeTopics(); saveTopicsToStorage(); renderAllPairsLists(); trainNeuralNet(true); addSystemMessage("🔄 Сброшено к заводским настройкам!"); }
+    function exportData() { let blob = new Blob([JSON.stringify({topics: currentTopics}, null, 2)], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "megamind_backup.json"; a.click(); addSystemMessage("💾 Экспорт выполнен!"); }
+    function importData(file) { let reader = new FileReader(); reader.onload = e => { try { let imp = JSON.parse(e.target.result); if(imp.topics) { currentTopics = imp.topics; saveTopicsToStorage(); renderAllPairsLists(); trainNeuralNet(true); addSystemMessage("📂 Импорт успешен!"); } } catch(err) { addSystemMessage("❌ Ошибка импорта"); } }; reader.readAsText(file); }
     
-    // Обработчики кнопок (десктоп и мобиль)
+    // Обработчики
     document.getElementById('addPairBtnDesktop')?.addEventListener('click', () => { let q=document.getElementById('newQuestionDesktop').value.trim(), a=document.getElementById('newAnswerDesktop').value.trim(); if(q&&a) addOrUpdateTopic(q,a); document.getElementById('newQuestionDesktop').value=""; document.getElementById('newAnswerDesktop').value=""; });
     document.getElementById('addPairBtnMobile')?.addEventListener('click', () => { let q=document.getElementById('newQuestionMobile').value.trim(), a=document.getElementById('newAnswerMobile').value.trim(); if(q&&a) addOrUpdateTopic(q,a); document.getElementById('newQuestionMobile').value=""; document.getElementById('newAnswerMobile').value=""; });
     document.getElementById('trainNowBtnDesktop')?.addEventListener('click', ()=>trainNeuralNet(true));
