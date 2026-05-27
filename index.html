@@ -2,717 +2,132 @@
 <html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>MegaMind AI — адаптивная нейросеть | Телефон, планшет, ПК</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>MegaMind AI — фиолетовый дизайн + нейросеть для кода и изображений</title>
     <script src="https://cdn.jsdelivr.net/npm/brain.js@2.0.0-beta.23/dist/browser.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            font-family: 'Segoe UI', 'Fira Code', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
-        }
-
-        /* Основные переменные */
-        :root {
-            --bg-start: #1a1030;
-            --bg-end: #0a0618;
-            --panel-bg: rgba(10, 6, 25, 0.92);
-            --accent: #a855f7;
-            --accent-light: #c084fc;
-            --accent-dark: #6b21a5;
-            --text-light: #e9d5ff;
-            --text-muted: #d8b4fe;
-            --card-bg: #1e1a3a;
-            --input-bg: #0f0a2a;
-            --user-msg-bg: #6b21a5;
-            --bot-msg-bg: #1e1a3a;
-            --border-radius: 20px;
-            --spacing: 16px;
-        }
-
-        body {
-            background: radial-gradient(circle at 10% 20%, var(--bg-start), var(--bg-end));
-            min-height: 100vh;
-            padding: 12px;
-        }
-
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', 'Fira Code', monospace; }
+        body { background: radial-gradient(circle at 10% 20%, #1a1030, #0a0618); min-height: 100vh; padding: 20px; }
         .app-window {
-            max-width: 1600px;
-            margin: 0 auto;
-            background: var(--panel-bg);
-            backdrop-filter: blur(14px);
-            border-radius: 32px;
-            display: flex;
-            overflow: hidden;
-            border: 1px solid var(--accent);
-            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-            height: calc(100vh - 24px);
-            transition: all 0.3s ease;
+            width: 1500px; max-width: 98vw; height: 90vh; margin: 0 auto;
+            background: rgba(25, 18, 45, 0.92); backdrop-filter: blur(14px); border-radius: 40px;
+            display: flex; overflow: hidden; border: 1px solid #a855f7;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.5);
         }
-
-        /* Панель обучения - десктопная версия */
         .training-panel {
-            width: 360px;
-            background: rgba(10, 6, 25, 0.85);
-            border-right: 1px solid var(--accent);
-            padding: 20px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
-            overflow-y: auto;
-            transition: transform 0.3s ease;
+            width: 380px; background: rgba(10, 6, 25, 0.85); border-right: 1px solid #a855f7;
+            padding: 20px 16px; display: flex; flex-direction: column; gap: 18px; overflow-y: auto;
         }
-
-        /* Основная область чата */
-        .chat-area {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            background: rgba(5, 10, 20, 0.5);
-            min-width: 0;
+        .panel-header { display: flex; justify-content: space-between; border-bottom: 2px solid #a855f7; padding-bottom: 8px; }
+        .panel-header h2 { font-size: 1rem; color: #d8b4fe; display: flex; gap: 6px; align-items: center; }
+        .badge { background: #6b21a5; padding: 3px 10px; border-radius: 30px; font-size: 0.6rem; color: #e9d5ff; }
+        .stats-area { background: #1e1a3a; border-radius: 20px; padding: 12px; text-align: center; border: 1px solid #a855f7; margin-bottom: 8px; }
+        .stats-number { font-size: 1.5rem; font-weight: bold; color: #c084fc; }
+        .stats-label { font-size: 0.65rem; color: #d8b4fe; }
+        .mode-selector { background: #1e1a3a; border-radius: 20px; padding: 14px; border: 1px solid #a855f7; }
+        .mode-selector h3 { font-size: 0.8rem; margin-bottom: 10px; color: #d8b4fe; }
+        .mode-buttons { display: flex; gap: 8px; flex-wrap: wrap; }
+        .mode-btn { background: #2d235a; padding: 8px 12px; font-size: 0.7rem; cursor: pointer; border-radius: 30px; border: none; color: #e9d5ff; font-weight: bold; transition: all 0.2s; }
+        .mode-btn.active { background: #a855f7; color: #1a1a2e; box-shadow: 0 0 10px rgba(168,85,247,0.5); }
+        .mode-btn:hover { background: #7c3aed; transform: scale(1.02); color: white; }
+        .add-pair-form { background: #1e1a3a; border-radius: 20px; padding: 14px; border: 1px solid #a855f7; }
+        .add-pair-form h3 { font-size: 0.8rem; margin-bottom: 10px; color: #d8b4fe; }
+        .input-group { margin-bottom: 10px; }
+        .input-group input, .input-group textarea {
+            width: 100%; background: #0f0a2a; border: 1px solid #a855f7; border-radius: 14px;
+            padding: 10px; color: #e9d5ff; resize: vertical; font-family: monospace;
         }
-
-        /* Шапка чата */
-        .chat-header {
-            padding: 16px 20px;
-            background: rgba(0, 0, 0, 0.4);
-            border-bottom: 1px solid var(--accent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 12px;
-        }
-
-        .chat-header h1 {
-            font-size: 1.1rem;
-            color: var(--text-light);
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
-        }
-
-        .current-mode-badge {
-            background: var(--accent);
-            color: #1a1a2e;
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 0.7rem;
-            font-weight: bold;
-        }
-
-        .export-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .export-buttons button,
-        .export-buttons label {
-            background: var(--accent-dark);
-            font-size: 0.65rem;
-            padding: 6px 12px;
-            cursor: pointer;
-        }
-
-        /* Область сообщений */
-        .chat-messages {
-            flex: 1;
-            overflow-y: auto;
-            padding: 16px 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 14px;
-        }
-
-        /* Сообщения */
-        .message {
-            display: flex;
-            flex-direction: column;
-            max-width: 85%;
-            animation: fadeIn 0.2s ease;
-        }
-
-        .user-msg {
-            align-self: flex-end;
-        }
-
-        .bot-msg {
-            align-self: flex-start;
-        }
-
-        .msg-bubble {
-            padding: 10px 16px;
-            border-radius: 24px;
-            background: #2d235a;
-            color: var(--text-light);
-            word-break: break-word;
-            font-size: 0.85rem;
-            white-space: pre-wrap;
-            line-height: 1.4;
-        }
-
-        .user-msg .msg-bubble {
-            background: var(--user-msg-bg);
-            border-bottom-right-radius: 6px;
-        }
-
-        .bot-msg .msg-bubble {
-            background: var(--bot-msg-bg);
-            border-left: 3px solid var(--accent);
-        }
-
-        /* Код-блоки */
-        .code-block {
-            background: #0f0a2a;
-            padding: 10px;
-            border-radius: 14px;
-            overflow-x: auto;
-            font-family: 'Fira Code', monospace;
-            font-size: 0.7rem;
-            margin-top: 8px;
-            border: 1px solid var(--accent);
-        }
-
-        .code-block pre {
-            margin: 0;
-            white-space: pre-wrap;
-            color: var(--text-muted);
-        }
-
-        /* Изображения */
-        .img-container {
-            margin-top: 10px;
-        }
-
-        .img-preview {
-            max-width: 100%;
-            max-height: 280px;
-            border-radius: 16px;
-            border: 2px solid var(--accent);
-            cursor: pointer;
-            transition: transform 0.2s;
-        }
-
-        .img-preview:hover {
-            transform: scale(1.02);
-        }
-
-        .img-buttons {
-            display: flex;
-            gap: 8px;
-            margin-top: 8px;
-            flex-wrap: wrap;
-        }
-
-        .img-btn {
-            background: #2d235a;
-            padding: 4px 12px;
-            font-size: 0.6rem;
-            border-radius: 30px;
-            cursor: pointer;
-            border: none;
-            color: var(--text-light);
-        }
-
-        .img-btn:hover {
-            background: var(--accent);
-            color: #1a1a2e;
-        }
-
-        /* Панель выбора режима */
-        .mode-selector {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 12px;
-            border: 1px solid var(--accent);
-        }
-
-        .mode-selector h3 {
-            font-size: 0.75rem;
-            margin-bottom: 10px;
-            color: var(--text-muted);
-        }
-
-        .mode-buttons {
-            display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-        }
-
-        .mode-btn {
-            background: #2d235a;
-            padding: 8px 12px;
-            font-size: 0.7rem;
-            cursor: pointer;
-            border-radius: 30px;
-            border: none;
-            color: var(--text-light);
-            font-weight: bold;
-            transition: all 0.2s;
-            flex: 1;
-            min-width: 90px;
-            text-align: center;
-        }
-
-        .mode-btn.active {
-            background: var(--accent);
-            color: #1a1a2e;
-            box-shadow: 0 0 8px rgba(168,85,247,0.5);
-        }
-
-        .mode-btn:active {
-            transform: scale(0.97);
-        }
-
-        /* Панель добавления ответов */
-        .add-pair-form {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 12px;
-            border: 1px solid var(--accent);
-        }
-
-        .add-pair-form h3 {
-            font-size: 0.75rem;
-            margin-bottom: 10px;
-            color: var(--text-muted);
-        }
-
-        .input-group {
-            margin-bottom: 10px;
-        }
-
-        .input-group input,
-        .input-group textarea {
-            width: 100%;
-            background: var(--input-bg);
-            border: 1px solid var(--accent);
-            border-radius: 14px;
-            padding: 8px 12px;
-            color: var(--text-light);
-            font-size: 0.8rem;
-            resize: vertical;
-        }
-
-        .input-group input:focus,
-        .input-group textarea:focus {
-            outline: none;
-            border-color: var(--accent-light);
-        }
-
-        /* Статистика */
-        .stats-area {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 10px;
-            text-align: center;
-            border: 1px solid var(--accent);
-        }
-
-        .stats-number {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--accent-light);
-        }
-
-        .stats-label {
-            font-size: 0.6rem;
-            color: var(--text-muted);
-        }
-
-        /* Ввод сообщения */
-        .input-area {
-            padding: 14px 20px;
-            background: #0f0a1a;
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid var(--accent);
-        }
-
-        #userInput {
-            flex: 1;
-            background: var(--input-bg);
-            border: 1px solid var(--accent);
-            border-radius: 60px;
-            padding: 12px 18px;
-            color: var(--text-light);
-            font-size: 0.85rem;
-        }
-
-        #sendBtn {
-            padding: 0 18px;
-            white-space: nowrap;
-        }
-
+        .input-group input:focus, .input-group textarea:focus { outline: none; border-color: #c084fc; box-shadow: 0 0 5px #a855f7; }
         button {
-            background: linear-gradient(95deg, var(--accent), var(--accent-dark));
-            border: none;
-            padding: 8px 14px;
-            border-radius: 40px;
-            font-weight: bold;
-            color: white;
-            cursor: pointer;
-            transition: 0.2s;
-            font-size: 0.75rem;
+            background: linear-gradient(95deg, #a855f7, #6b21a5); border: none; padding: 8px 14px;
+            border-radius: 40px; font-weight: bold; color: white; cursor: pointer; transition: 0.2s; font-size: 0.75rem;
         }
-
-        button:active {
-            transform: scale(0.97);
+        button:hover { transform: scale(1.02); opacity: 0.9; box-shadow: 0 0 8px rgba(168,85,247,0.5); }
+        .train-btn { background: linear-gradient(95deg, #8b5cf6, #5b21b6); width: 100%; }
+        .pairs-list { flex: 1; overflow-y: auto; margin-top: 6px; max-height: 150px; font-size: 0.7rem; }
+        .pair-item { background: #0f0a2a; border-radius: 18px; padding: 6px; margin-bottom: 6px; border-left: 3px solid #a855f7; }
+        .pair-question { font-weight: bold; color: #d8b4fe; }
+        .pair-answer { color: #c084fc; margin-top: 3px; font-size: 0.6rem; }
+        .delete-topic { background: #5e2e42; padding: 2px 8px; border-radius: 30px; font-size: 0.5rem; margin-top: 4px; }
+        .status-area { background: #0f0a1a; border-radius: 20px; padding: 10px; font-size: 0.7rem; text-align: center; color: #d8b4fe; }
+        .chat-area { flex: 1; display: flex; flex-direction: column; background: rgba(5, 10, 20, 0.5); }
+        .chat-header { padding: 18px 24px; background: rgba(0,0,0,0.4); border-bottom: 1px solid #a855f7; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; }
+        .chat-header h1 { font-size: 1.2rem; color: #e9d5ff; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+        .export-buttons { display: flex; gap: 10px; }
+        .export-buttons button { background: #6b21a5; font-size: 0.7rem; padding: 6px 12px; }
+        .export-buttons button:hover { background: #a855f7; }
+        .chat-messages { flex: 1; overflow-y: auto; padding: 20px 24px; display: flex; flex-direction: column; gap: 16px; }
+        .message { display: flex; flex-direction: column; max-width: 90%; animation: fadeIn 0.2s; }
+        .user-msg { align-self: flex-end; }
+        .bot-msg { align-self: flex-start; }
+        .msg-bubble {
+            padding: 12px 18px; border-radius: 28px; background: #2d235a; color: #f3e8ff;
+            word-break: break-word; font-size: 0.85rem; white-space: pre-wrap; font-family: 'Segoe UI', system-ui;
         }
-
-        .train-btn {
-            background: linear-gradient(95deg, #8b5cf6, #5b21b6);
-            width: 100%;
-        }
-
-        .status-area {
-            background: #0f0a1a;
-            border-radius: var(--border-radius);
-            padding: 8px;
-            font-size: 0.65rem;
-            text-align: center;
-            color: var(--text-muted);
-        }
-
-        .pairs-list {
-            max-height: 140px;
-            overflow-y: auto;
-            font-size: 0.65rem;
-        }
-
-        .pair-item {
-            background: #0f0a2a;
-            border-radius: 14px;
-            padding: 6px;
-            margin-bottom: 6px;
-            border-left: 3px solid var(--accent);
-        }
-
-        .delete-topic {
-            background: #5e2e42;
-            padding: 2px 8px;
-            border-radius: 30px;
-            font-size: 0.5rem;
-            margin-top: 4px;
-        }
-
-        /* Модальное окно */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 1000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.95);
-            justify-content: center;
-            align-items: center;
-        }
-
-        .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 20px;
-            border: 2px solid var(--accent);
-        }
-
-        .close-modal {
-            position: absolute;
-            top: 20px;
-            right: 35px;
-            color: var(--text-muted);
-            font-size: 40px;
-            cursor: pointer;
-        }
-
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #fff;
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* СКРОЛЛБАРЫ */
-        ::-webkit-scrollbar { width: 4px; }
-        ::-webkit-scrollbar-track { background: var(--input-bg); }
-        ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
-
-        /* ========== АДАПТИВНОСТЬ ========== */
-
-        /* ПЛАНШЕТЫ (768px - 1024px) */
-        @media (max-width: 1024px) and (min-width: 768px) {
-            .app-window {
-                flex-direction: column;
-                height: auto;
-                min-height: calc(100vh - 24px);
-            }
-
-            .training-panel {
-                width: 100%;
-                max-height: 280px;
-                flex-direction: row;
-                flex-wrap: wrap;
-                gap: 12px;
-                border-right: none;
-                border-bottom: 1px solid var(--accent);
-                padding: 14px;
-            }
-
-            .training-panel > * {
-                flex: 1;
-                min-width: 200px;
-            }
-
-            .pairs-list {
-                max-height: 100px;
-            }
-
-            .chat-header h1 {
-                font-size: 1rem;
-            }
-
-            .mode-buttons {
-                flex-wrap: wrap;
-            }
-
-            .mode-btn {
-                min-width: 80px;
-                padding: 6px 10px;
-                font-size: 0.65rem;
-            }
-        }
-
-        /* ТЕЛЕФОНЫ (до 767px) */
-        @media (max-width: 767px) {
-            body {
-                padding: 8px;
-            }
-
-            .app-window {
-                flex-direction: column;
-                height: auto;
-                min-height: calc(100vh - 16px);
-                border-radius: 24px;
-            }
-
-            /* Панель управления — вверху, сворачиваемая */
-            .training-panel {
-                width: 100%;
-                max-height: 260px;
-                border-right: none;
-                border-bottom: 1px solid var(--accent);
-                padding: 12px;
-                gap: 10px;
-                overflow-y: auto;
-                order: -1;
-            }
-
-            /* Группировка элементов панели */
-            .stats-area {
-                padding: 6px;
-            }
-
-            .stats-number {
-                font-size: 1.2rem;
-            }
-
-            .mode-selector {
-                padding: 10px;
-            }
-
-            .mode-buttons {
-                gap: 6px;
-            }
-
-            .mode-btn {
-                min-width: 70px;
-                padding: 6px 8px;
-                font-size: 0.6rem;
-            }
-
-            .add-pair-form {
-                padding: 10px;
-            }
-
-            .add-pair-form h3 {
-                font-size: 0.7rem;
-            }
-
-            .input-group input,
-            .input-group textarea {
-                font-size: 0.75rem;
-                padding: 6px 10px;
-            }
-
-            /* Чат */
-            .chat-header {
-                padding: 12px 14px;
-            }
-
-            .chat-header h1 {
-                font-size: 0.9rem;
-            }
-
-            .current-mode-badge {
-                font-size: 0.6rem;
-                padding: 3px 8px;
-            }
-
-            .export-buttons button,
-            .export-buttons label {
-                font-size: 0.6rem;
-                padding: 4px 10px;
-            }
-
-            .chat-messages {
-                padding: 12px;
-            }
-
-            .message {
-                max-width: 95%;
-            }
-
-            .msg-bubble {
-                padding: 8px 12px;
-                font-size: 0.8rem;
-            }
-
-            .code-block {
-                font-size: 0.65rem;
-                padding: 8px;
-            }
-
-            .img-preview {
-                max-height: 200px;
-            }
-
-            .input-area {
-                padding: 10px 14px;
-                gap: 8px;
-            }
-
-            #userInput {
-                padding: 10px 14px;
-                font-size: 0.8rem;
-            }
-
-            #sendBtn {
-                padding: 0 14px;
-                font-size: 0.7rem;
-            }
-
-            button {
-                padding: 6px 12px;
-                font-size: 0.7rem;
-            }
-
-            .status-area {
-                font-size: 0.6rem;
-            }
-
-            .close-modal {
-                top: 10px;
-                right: 20px;
-                font-size: 30px;
-            }
-        }
-
-        /* ОЧЕНЬ МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) */
-        @media (max-width: 480px) {
-            .training-panel {
-                max-height: 280px;
-            }
-
-            .mode-btn {
-                min-width: 55px;
-                font-size: 0.55rem;
-                padding: 5px 6px;
-            }
-
-            .chat-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .export-buttons {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
-            .msg-bubble {
-                font-size: 0.75rem;
-            }
-        }
-
-        /* ДЕСКТОПЫ (более 1200px) */
-        @media (min-width: 1400px) {
-            .app-window {
-                max-width: 1600px;
-            }
-
-            .training-panel {
-                width: 400px;
-            }
-
-            .msg-bubble {
-                font-size: 0.9rem;
-            }
-        }
+        .user-msg .msg-bubble { background: #6b21a5; border-bottom-right-radius: 8px; }
+        .bot-msg .msg-bubble { background: #1e1a3a; border-left: 4px solid #a855f7; }
+        .code-block { background: #0f0a2a; padding: 12px; border-radius: 16px; overflow-x: auto; font-family: 'Fira Code', monospace; font-size: 0.75rem; margin-top: 8px; border: 1px solid #a855f7; }
+        .code-block pre { margin: 0; white-space: pre-wrap; color: #d8b4fe; }
+        .img-container { position: relative; display: inline-block; margin-top: 12px; }
+        .img-preview { max-width: 320px; border-radius: 20px; border: 2px solid #a855f7; box-shadow: 0 4px 15px rgba(0,0,0,0.3); background: white; cursor: pointer; transition: transform 0.2s; }
+        .img-preview:hover { transform: scale(1.02); }
+        .img-buttons { display: flex; gap: 8px; margin-top: 8px; justify-content: center; }
+        .img-btn { background: #2d235a; padding: 4px 12px; font-size: 0.65rem; border-radius: 30px; cursor: pointer; border: none; color: #e9d5ff; }
+        .img-btn:hover { background: #a855f7; color: #1a1a2e; }
+        .input-area { padding: 18px 24px; background: #0f0a1a; display: flex; gap: 12px; border-top: 1px solid #a855f7; }
+        #userInput { flex: 1; background: #1e1a3a; border: 1px solid #a855f7; border-radius: 60px; padding: 14px 20px; color: #e9d5ff; font-family: monospace; font-size: 0.9rem; }
+        #userInput:focus { outline: none; border-color: #c084fc; box-shadow: 0 0 8px rgba(168,85,247,0.3); }
+        #userInput::placeholder { color: #7e69a8; }
+        .loading-spinner { display: inline-block; width: 20px; height: 20px; border: 2px solid #e9d5ff; border-top-color: #a855f7; border-radius: 50%; animation: spin 0.8s linear infinite; margin-left: 10px; vertical-align: middle; }
+        .modal { display: none; position: fixed; z-index: 1000; left: 0; top: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,0.95); justify-content: center; align-items: center; }
+        .modal-content { margin: auto; display: block; max-width: 90%; max-height: 90%; border-radius: 20px; border: 2px solid #a855f7; }
+        .close-modal { position: absolute; top: 20px; right: 35px; color: #d8b4fe; font-size: 40px; font-weight: bold; cursor: pointer; }
+        .close-modal:hover { color: #a855f7; }
+        .current-mode-badge { background: #a855f7; color: #1a1a2e; padding: 4px 12px; border-radius: 30px; font-size: 0.7rem; font-weight: bold; display: inline-block; margin-left: 10px; }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        ::-webkit-scrollbar { width: 5px; }
+        ::-webkit-scrollbar-track { background: #1e1a3a; }
+        ::-webkit-scrollbar-thumb { background: #a855f7; border-radius: 10px; }
     </style>
 </head>
 <body>
 <div class="app-window">
     <div class="training-panel">
-        <div class="panel-header" style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); padding-bottom: 8px;">
-            <h2 style="color: var(--text-light); font-size: 0.9rem;">🧠 MegaMind AI <span style="background: var(--accent-dark); padding: 2px 8px; border-radius: 20px; font-size: 0.55rem;">адаптивный</span></h2>
+        <div class="panel-header">
+            <h2>🧠 MegaMind AI <span class="badge">фиолетовая версия</span></h2>
             <button id="resetDataBtn" style="background:#4e2c3e;">Сброс</button>
         </div>
 
         <div class="stats-area">
             <div class="stats-number" id="totalAnswersCount">0</div>
-            <div class="stats-label">всего ответов</div>
+            <div class="stats-label">всего текстовых ответов</div>
         </div>
 
         <div class="mode-selector">
-            <h3>🎛️ РЕЖИМЫ</h3>
+            <h3>🎛️ ВЫБЕРИ РЕЖИМ РАБОТЫ</h3>
             <div class="mode-buttons">
-                <button id="modeText" class="mode-btn" data-mode="text">📝 ТЕКСТ</button>
-                <button id="modeCode" class="mode-btn" data-mode="code">💻 КОД</button>
-                <button id="modeImageCanvas" class="mode-btn" data-mode="imageCanvas">🎨 CANVAS</button>
-                <button id="modeImageAI" class="mode-btn" data-mode="imageAI">🤖 AI</button>
+                <button id="modeText" class="mode-btn" data-mode="text">📝 ТЕКСТ (1000+ ответов)</button>
+                <button id="modeCode" class="mode-btn" data-mode="code">💻 КОД (нейросеть AI)</button>
+                <button id="modeImageCanvas" class="mode-btn" data-mode="imageCanvas">🎨 ИЗОБРАЖЕНИЯ (Canvas)</button>
+                <button id="modeImageAI" class="mode-btn" data-mode="imageAI">🤖 ИЗОБРАЖЕНИЯ (AI)</button>
             </div>
-            <div class="status-area" id="modeStatus" style="margin-top: 6px;">⚡ Режим: ТЕКСТ</div>
+            <div class="status-area" id="modeStatus" style="margin-top:8px;">⚡ Режим: ТЕКСТ (тысячи ответов)</div>
         </div>
 
         <div class="add-pair-form">
-            <h3>➕ Добавить свой ответ</h3>
-            <div class="input-group"><input type="text" id="newQuestion" placeholder="Ключевое слово (анекдот, факт...)"></div>
-            <div class="input-group"><textarea id="newAnswer" rows="2" placeholder="Ваш ответ"></textarea></div>
-            <button id="addPairBtn">📚 Добавить</button>
+            <h3>➕ Добавить свой ответ в базу</h3>
+            <div class="input-group"><input type="text" id="newQuestion" placeholder="Ключевое слово (например, анекдот, факт)"></div>
+            <div class="input-group"><textarea id="newAnswer" rows="2" placeholder="Ваш вариант ответа"></textarea></div>
+            <button id="addPairBtn">📚 Добавить вариант</button>
+            <small style="color:#c084fc;">*Каждый новый ответ увеличивает базу знаний!</small>
         </div>
         
-        <button id="trainNowBtn" class="train-btn">⚙️ Переобучить</button>
-        <div class="status-area" id="trainStatus">🧠 Готово</div>
-        <div><h3 style="font-size:0.65rem; color:var(--text-muted);">📚 Темы</h3>
+        <button id="trainNowBtn" class="train-btn">⚙️ Переобучить нейросеть</button>
+        <div class="status-area" id="trainStatus">🧠 База готова</div>
+        <div><h3 style="font-size:0.7rem; color:#d8b4fe;">📚 Темы в базе</h3>
         <div id="pairsContainer" class="pairs-list"></div></div>
+        <div class="status-area">💡 Попробуй: "анекдот", "расскажи шутку", "факт", "совет", "тост"</div>
     </div>
 
     <div class="chat-area">
@@ -720,24 +135,25 @@
             <h1>🧠 MegaMind AI <span id="currentModeDisplay" class="current-mode-badge">📝 Текст</span></h1>
             <div class="export-buttons">
                 <button id="exportBtn">💾 Экспорт</button>
-                <label for="importFileInput" style="background: var(--accent-dark); padding: 6px 12px; border-radius: 40px; font-size:0.65rem; cursor:pointer;">📂 Импорт</label>
+                <label for="importFileInput" style="background: #6b21a5; padding: 6px 12px; border-radius: 40px; font-size:0.7rem; cursor:pointer;">📂 Импорт</label>
                 <input type="file" id="importFileInput" accept=".json" style="display:none">
             </div>
         </div>
         <div class="chat-messages" id="chatMessages">
             <div class="message bot-msg">
-                <div class="msg-bubble">🧠 <b>MegaMind AI</b> — выбери режим кнопками!<br>
-                🔥 Примеры:<br>
-                • <b>ТЕКСТ</b> — "анекдот", "факт", "совет"<br>
-                • <b>КОД</b> — "калькулятор на python"<br>
-                • <b>CANVAS</b> — "нарисуй кота"<br>
-                • <b>AI</b> — "создай изображение города"</div>
+                <div class="msg-bubble">🧠 <b>MegaMind AI</b> — выбери режим работы кнопками справа!<br><br>
+                📌 <b>Доступные режимы:</b><br>
+                • <b>📝 ТЕКСТ</b> — тысячи анекдотов, фактов, советов, мудростей. Просто напиши "анекдот", "шутка", "факт", "совет"<br>
+                • <b>💻 КОД (нейросеть)</b> — напиши "калькулятор на python", "игру на js", "форму html"<br>
+                • <b>🎨 ИЗОБРАЖЕНИЯ (Canvas)</b> — нарисуй что угодно из фигур<br>
+                • <b>🤖 ИЗОБРАЖЕНИЯ (AI)</b> — нейросеть для картинок<br><br>
+                🔥 <b>Попробуй прямо сейчас!</b> Напиши <b>"анекдот"</b> или <b>"расскажи шутку"</b>!</div>
                 <div class="msg-meta">MegaMind AI • online</div>
             </div>
         </div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Напиши: анекдот, факт, или калькулятор на python..." autocomplete="off">
-            <button id="sendBtn">→</button>
+            <input type="text" id="userInput" placeholder="Напиши: анекдот, факт, совет, или калькулятор на python, или нарисуй кота" autocomplete="off">
+            <button id="sendBtn">Отправить</button>
         </div>
     </div>
 </div>
@@ -748,35 +164,33 @@
 </div>
 
 <script>
-    // ==================== АДАПТИВНАЯ ВЕРСИЯ — ВСЯ ЛОГИКА СОХРАНЕНА ====================
+    // ==================== ТЕКУЩИЙ РЕЖИМ ====================
     let currentMode = 'text';
-    let neuralNetwork = null;
-    let currentTopics = [];
-    let globalVocabulary = [];
-    let isTraining = false;
     
     function setMode(mode) {
         currentMode = mode;
         document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        
         let modeText = '';
         if (mode === 'text') {
             document.getElementById('modeText').classList.add('active');
-            modeText = '📝 ТЕКСТ';
+            modeText = '📝 ТЕКСТ (1000+ ответов)';
             document.getElementById('currentModeDisplay').innerHTML = '📝 Текст';
         } else if (mode === 'code') {
             document.getElementById('modeCode').classList.add('active');
-            modeText = '💻 КОД';
-            document.getElementById('currentModeDisplay').innerHTML = '💻 Код';
+            modeText = '💻 КОД (нейросеть Pollinations AI)';
+            document.getElementById('currentModeDisplay').innerHTML = '💻 Код (AI)';
         } else if (mode === 'imageCanvas') {
             document.getElementById('modeImageCanvas').classList.add('active');
-            modeText = '🎨 CANVAS';
-            document.getElementById('currentModeDisplay').innerHTML = '🎨 Canvas';
+            modeText = '🎨 ИЗОБРАЖЕНИЯ (Canvas Art)';
+            document.getElementById('currentModeDisplay').innerHTML = '🎨 Изображения';
         } else if (mode === 'imageAI') {
             document.getElementById('modeImageAI').classList.add('active');
-            modeText = '🤖 AI ИЗОБРАЖЕНИЯ';
-            document.getElementById('currentModeDisplay').innerHTML = '🤖 AI';
+            modeText = '🤖 ИЗОБРАЖЕНИЯ (Pollinations AI)';
+            document.getElementById('currentModeDisplay').innerHTML = '🤖 Изображения (AI)';
         }
-        document.getElementById('modeStatus').innerHTML = `✅ Режим: ${modeText}`;
+        document.getElementById('modeStatus').innerHTML = `✅ Активен режим: ${modeText}`;
+        addSystemMessage(`🔄 Режим изменён на ${modeText}`);
     }
     
     document.getElementById('modeText').addEventListener('click', () => setMode('text'));
@@ -789,38 +203,102 @@
     function hashCode(str, seed = 0) { let hash = seed; for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; } return Math.abs(hash); }
     function seededRandom(hash, step) { return ((hash + step) % 0x7fffffff) / 0x7fffffff; }
     
-    // ==================== БАЗА ТЕКСТОВЫХ ОТВЕТОВ ====================
+    // ==================== 1. РЕЖИМ ТЕКСТА ====================
+    let neuralNetwork = null;
+    let currentTopics = [];
+    let globalVocabulary = [];
+    let isTraining = false;
+    
     function buildLargeTopics() {
         const topics = [];
+        
         const jokes = [
             "— Почему программисты путают Хэллоуин и Рождество? Потому что 31 Oct = 25 Dec!",
             "Встречаются два программиста: — Слышал, у тебя новая работа? — Да, теперь я пишу код на Python. — А раньше на чём? — На кофе.",
             "Сколько программистов нужно, чтобы заменить лампочку? Ни одного, это аппаратная проблема.",
-            "— Доктор, я себя чувствую нейросетью. — Почему? — Обучаюсь на ошибках, но всё равно иногда галлюцинирую."
+            "— Доктор, я себя чувствую нейросетью. — Почему? — Обучаюсь на ошибках, но всё равно иногда галлюцинирую.",
+            "Заходит мужик в бар и говорит: — Мне виски с соком. — С каким соком? — С каким-нибудь, я не принципиален. — Тогда с кактусовым. — ...давай.",
+            "Идёт медведь по лесу, видит — машина горит. Сел в неё и сгорел. Мораль: не садись в горящую машину.",
+            "— Почему вы так громко разговариваете по телефону? — Я же домашний кинотеатр включил.",
+            "Учитель: — Петров, почему ты вчера не был в школе? — Мама сказала, что я слишком умный для этого класса.",
+            "Вовочка: — Мам, а почему папа так странно ходит? — Потому что у него новые ботинки жмут.",
+            "— Алло, это полиция? У меня украли велосипед. — Опишите приметы. — У него два колеса, сиденье и руль.",
+            "Идёт ёжик по лесу, навстречу заяц: — Ёжик, почему ты такой колючий? — А это я на всякий случай.",
+            "Пациент врачу: — Доктор, я чувствую себя собакой. — Как давно? — С детства, но только сейчас залаяло.",
+            "Терапевт: — Вам нужно срочно бросить пить и курить. Пациент: — А когда начать? — Начните с сегодняшнего дня!"
         ];
-        topics.push({ name: "jokes", keywords: ["анекдот", "шутка", "юмор", "прикол", "рассмеши", "расскажи анекдот", "раскажи анекдот"], answers: jokes });
+        topics.push({ name: "jokes", keywords: ["анекдот", "шутка", "юмор", "прикол", "рассмеши", "расскажи анекдот", "расскажи шутку", "смешная история", "смешное", "раскажи анекдот", "скажи анекдот", "пошути"], answers: jokes });
         
         const facts = [
             "У осьминога три сердца. Два качают кровь через жабры, третье — через тело.",
             "В 1977 году был отправлен золотой диск на Voyager с музыкой и звуками Земли.",
-            "Небо голубое из-за рэлеевского рассеяния."
+            "Небо голубое из-за рэлеевского рассеяния.",
+            "У пчёл есть свой язык танца, с помощью которого они сообщают о местонахождении еды.",
+            "Страусы не прячут голову в песок — это миф.",
+            "В Японии есть остров, где живут только кролики — Окуношима.",
+            "Кошки спят около 16 часов в сутки.",
+            "Самый длинный забор в мире — забор Динго в Австралии, 5614 км.",
+            "У слонов отличная память, они могут узнавать себя в зеркале."
         ];
-        topics.push({ name: "facts", keywords: ["факт", "интересный факт", "знаешь ли ты"], answers: facts });
+        topics.push({ name: "facts", keywords: ["факт", "интересный факт", "знаешь ли ты", "удивительный факт", "расскажи факт"], answers: facts });
         
         const advices = [
             "Будь любопытным — учись новому каждый день.",
             "Не бойся ошибок, они — лучший учитель.",
-            "Высыпайся, пей воду, и не забывай отдыхать от экранов!"
+            "Высыпайся, пей воду, и не забывай отдыхать от экранов!",
+            "Пробуй новое: хобби, спорт, путешествия.",
+            "Маленькие шаги каждый день приводят к большим результатам.",
+            "Окружай себя теми, кто вдохновляет тебя на рост.",
+            "Не сравнивай себя с другими — сравнивай себя с собой вчерашним.",
+            "Улыбайся даже когда тяжело — это реально работает!"
         ];
-        topics.push({ name: "advices", keywords: ["совет", "как быть счастливым", "мотивация"], answers: advices });
+        topics.push({ name: "advices", keywords: ["совет", "как быть счастливым", "мотивация", "жизненный совет", "посоветуй", "дай совет"], answers: advices });
+        
+        const wisdoms = [
+            "Смысл жизни — в поиске смысла. Каждый находит свой путь.",
+            "По Камю: нужно принять абсурд и жить страстно.",
+            "Быть полезным другим и развиваться — вот что придаёт жизни ценность.",
+            "Счастье не в том, чтобы делать всегда то, что хочешь, а в том, чтобы хотеть то, что делаешь.",
+            "То, что нас не убивает, делает нас сильнее. — Ницше",
+            "Будь изменением, которое хочешь видеть в мире. — Ганди",
+            "Жизнь — это то, что с тобой происходит, пока ты строишь планы. — Леннон"
+        ];
+        topics.push({ name: "wisdoms", keywords: ["мудрость", "цитата", "философия", "смысл жизни", "умная мысль"], answers: wisdoms });
+        
+        const toasts = [
+            "За то, чтобы в жизни всегда был повод для улыбки!",
+            "Поднимем бокалы за то, чтобы наши мечты сбывались!",
+            "Желаю, чтобы каждый день приносил радость!",
+            "Пусть удача всегда идёт с тобой рука об руку!",
+            "За здоровье и счастье близких — это самое важное!"
+        ];
+        topics.push({ name: "toasts", keywords: ["тост", "поздравление", "застолье", "пожелание"], answers: toasts });
         
         return topics;
     }
     
     function tokenize(text) { if(!text) return []; let c = text.toLowerCase().replace(/[^\w\sа-яё]/gi, ' '); return c.split(/\s+/).filter(w=>w.length); }
-    function buildGlobalVocabulary(topics) { let set=new Set(); for(let t of topics) for(let kw of t.keywords) tokenize(kw).forEach(w=>set.add(w)); return Array.from(set).sort(); }
-    function encodeQuestion(q, vocab) { let tokens=new Set(tokenize(q)); return vocab.map(w=>tokens.has(w)?1:0); }
-    function prepareBrainData(topics, vocab) { let data=[]; for(let idx=0; idx<topics.length; idx++) for(let kw of topics[idx].keywords) data.push({input: encodeQuestion(kw, vocab), output: Object.assign(new Array(topics.length).fill(0), {[idx]:1})}); return data; }
+    
+    function buildGlobalVocabulary(topics) {
+        let set = new Set();
+        for(let t of topics) for(let kw of t.keywords) tokenize(kw).forEach(w=>set.add(w));
+        return Array.from(set).sort();
+    }
+    
+    function encodeQuestion(q, vocab) {
+        let tokens = new Set(tokenize(q));
+        return vocab.map(w=>tokens.has(w)?1:0);
+    }
+    
+    function prepareBrainData(topics, vocab) {
+        let data = [];
+        for(let idx=0; idx<topics.length; idx++) {
+            for(let kw of topics[idx].keywords) {
+                data.push({input: encodeQuestion(kw, vocab), output: Object.assign(new Array(topics.length).fill(0), {[idx]:1})});
+            }
+        }
+        return data;
+    }
     
     async function trainNeuralNet(showMsg=true) {
         if(isTraining || !currentTopics.length) return false;
@@ -829,15 +307,15 @@
         let brainData = prepareBrainData(currentTopics, globalVocabulary);
         if(!brainData.length) return false;
         isTraining = true;
-        document.getElementById('trainStatus').innerHTML = `🔄 Обучение...`;
-        neuralNetwork = new brain.NeuralNetwork({ activation: 'sigmoid', hiddenLayers: [Math.min(40, Math.floor((globalVocabulary.length+currentTopics.length)*0.8)), Math.max(6, Math.floor(currentTopics.length*1.2))], learningRate: 0.5, momentum:0.2 });
+        trainStatusDiv.innerHTML = `🔄 Обучение на ${brainData.length} примерах...`;
+        neuralNetwork = new brain.NeuralNetwork({ activation: 'sigmoid', hiddenLayers: [Math.min(60, Math.floor((globalVocabulary.length+currentTopics.length)*0.8)), Math.max(8, Math.floor(currentTopics.length*1.2))], learningRate: 0.5, momentum:0.2 });
         return new Promise((resolve)=>{
-            neuralNetwork.train(brainData, { iterations: 500, errorThresh:0.02, log:false });
+            neuralNetwork.train(brainData, { iterations: 800, errorThresh:0.01, log:false, callbackPeriod:300 });
             let total = currentTopics.reduce((s,t)=>s+t.answers.length,0);
             document.getElementById('totalAnswersCount').innerText = total;
-            document.getElementById('trainStatus').innerHTML = `✅ Готово! ${total} ответов`;
+            trainStatusDiv.innerHTML = `✅ Обучена! ${total} вариантов`;
             isTraining = false;
-            if(showMsg) addSystemMessage(`🧠 Нейросеть обучена! ${total} ответов.`);
+            if(showMsg) addSystemMessage(`🧠 Нейросеть переобучена! ${total} вариантов ответов.`);
             resolve(true);
         });
     }
@@ -850,15 +328,15 @@
         for(let i=1;i<out.length;i++) if(out[i]>out[maxIdx]) maxIdx=i;
         if(out[maxIdx] < 0.2) {
             const lowerQ = question.toLowerCase();
-            if (lowerQ.includes('анекдот') || lowerQ.includes('шутк')) {
+            if (lowerQ.includes('анекдот') || lowerQ.includes('шутк') || lowerQ.includes('юмор') || lowerQ.includes('смешн') || lowerQ.includes('раскажи') || lowerQ.includes('расскажи')) {
                 const jokeTopic = currentTopics.find(t => t.name === 'jokes');
                 if (jokeTopic) return jokeTopic.answers[Math.floor(Math.random() * jokeTopic.answers.length)];
             }
-            if (lowerQ.includes('факт')) {
+            if (lowerQ.includes('факт') || lowerQ.includes('интересн')) {
                 const factTopic = currentTopics.find(t => t.name === 'facts');
                 if (factTopic) return factTopic.answers[Math.floor(Math.random() * factTopic.answers.length)];
             }
-            if (lowerQ.includes('совет')) {
+            if (lowerQ.includes('совет') || lowerQ.includes('мотивац')) {
                 const adviceTopic = currentTopics.find(t => t.name === 'advices');
                 if (adviceTopic) return adviceTopic.answers[Math.floor(Math.random() * adviceTopic.answers.length)];
             }
@@ -868,12 +346,12 @@
         return topic.answers[Math.floor(Math.random() * topic.answers.length)];
     }
     
-    // ==================== ГЕНЕРАЦИЯ КОДА ====================
+    // ==================== 2. КОД ====================
     async function generateCodeWithAI(prompt) {
         try {
-            const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(`Напиши код по запросу: ${prompt}. Выдай только готовый код.`)}`;
+            const url = `https://text.pollinations.ai/prompt/${encodeURIComponent(`Ты эксперт по программированию. Напиши код на языке по запросу: ${prompt}. Выдай только готовый код без лишних объяснений.`)}`;
             const response = await fetch(url);
-            if (!response.ok) throw new Error();
+            if (!response.ok) throw new Error(`HTTP ${response.status}`);
             let text = await response.text();
             if (!text.includes('```') && text.length > 10) text = '```\n' + text + '\n```';
             return { success: true, code: text };
@@ -887,11 +365,15 @@
         if (result.success && result.code && result.code.length > 20) {
             return { type: "code", data: result.code };
         } else {
-            return { type: "code", data: "```python\ndef factorial(n):\n    return 1 if n <= 1 else n * factorial(n-1)\n```" };
+            const fallbackCodes = [
+                "```python\ndef factorial(n):\n    return 1 if n <= 1 else n * factorial(n-1)\n\nprint(factorial(5))\n```",
+                "```javascript\nfunction factorial(n) {\n    return n <= 1 ? 1 : n * factorial(n-1);\n}\nconsole.log(factorial(5));\n```"
+            ];
+            return { type: "code", data: fallbackCodes[Math.floor(Math.random() * fallbackCodes.length)] };
         }
     }
     
-    // ==================== ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ ====================
+    // ==================== 3. ИЗОБРАЖЕНИЯ ====================
     function generateCanvasImage(description) {
         const canvas = document.createElement('canvas');
         canvas.width = 400;
@@ -900,9 +382,11 @@
         const randomSeed = getRandomSeed();
         const hash = hashCode(description, randomSeed);
         const bgHue = (hash % 360);
+        
         ctx.fillStyle = `hsl(${bgHue}, 60%, 75%)`;
         ctx.fillRect(0, 0, canvas.width, canvas.height);
-        const numShapes = 8 + Math.floor(seededRandom(hash, 100) * 20);
+        
+        const numShapes = 10 + Math.floor(seededRandom(hash, 100) * 25);
         for (let i = 0; i < numShapes; i++) {
             let x = 30 + seededRandom(hash, i * 11) * (canvas.width - 60);
             let y = 40 + seededRandom(hash, i * 73) * (canvas.height - 80);
@@ -913,18 +397,20 @@
             ctx.arc(x, y, size / 2, 0, Math.PI * 2);
             ctx.fill();
         }
+        
         let shortDesc = description.length > 25 ? description.substring(0, 22) + "..." : description;
-        ctx.font = "bold 14px 'Segoe UI'";
+        ctx.font = "bold 16px 'Segoe UI'";
         ctx.fillStyle = "#1a1a2e";
-        ctx.fillText(`"${shortDesc}"`, 15, canvas.height - 15);
+        ctx.fillText(`✨ "${shortDesc}"`, 15, canvas.height - 15);
         return canvas.toDataURL();
     }
     
     async function generateAIImage(description) {
         let cleanPrompt = description.replace(/^(нарисуй|сгенерируй|создай|изобрази)\s+/i, '').trim();
         if(!cleanPrompt) cleanPrompt = description;
+        const randomSeed = getRandomSeed();
         try {
-            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=400&height=400&nologo=true&seed=${getRandomSeed()}`;
+            const url = `https://image.pollinations.ai/prompt/${encodeURIComponent(cleanPrompt)}?width=400&height=400&nologo=true&seed=${randomSeed}`;
             const response = await fetch(url);
             if (!response.ok) throw new Error();
             const blob = await response.blob();
@@ -938,23 +424,26 @@
         }
     }
     
+    // ==================== ОСНОВНОЙ ОБРАБОТЧИК ====================
     async function handleUserQuery(query) {
         if (currentMode === 'text') {
             let answer = getTextResponse(query);
             if (answer) return { type: "text", data: answer };
-            return { type: "text", data: "Не понял. Попробуй 'анекдот', 'факт', 'совет'" };
+            return { type: "text", data: "Не понял запрос. Попробуй: 'анекдот', 'шутка', 'факт', 'совет', 'мудрость', 'тост'" };
         }
         else if (currentMode === 'code') return await handleCodeRequest(query);
-        else if (currentMode === 'imageCanvas') return { type: "image", data: generateCanvasImage(query), text: `🎨 "${query}"` };
+        else if (currentMode === 'imageCanvas') return { type: "image", data: generateCanvasImage(query), text: `🎨 Canvas Art: "${query}"` };
         else if (currentMode === 'imageAI') {
             const result = await generateAIImage(query);
-            if (result.success) return { type: "image", data: result.imageData, text: `🤖 "${query}"` };
-            else return { type: "image", data: generateCanvasImage(query), text: `⚠️ AI ошибка, Canvas: "${query}"` };
+            if (result.success) return { type: "image", data: result.imageData, text: `🤖 AI Image: "${query}"` };
+            else return { type: "image", data: generateCanvasImage(query), text: `⚠️ AI ошибка, Canvas Art: "${query}"` };
         }
-        return { type: "text", data: "Выберите режим!" };
+        return { type: "text", data: "Выберите режим работы!" };
     }
     
-    // ==================== UI ФУНКЦИИ ====================
+    // ==================== UI ====================
+    const pairsContainer = document.getElementById('pairsContainer');
+    const trainStatusDiv = document.getElementById('trainStatus');
     const chatMessagesDiv = document.getElementById('chatMessages');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
@@ -965,7 +454,6 @@
     const importFileInput = document.getElementById('importFileInput');
     const newQuestionInput = document.getElementById('newQuestion');
     const newAnswerInput = document.getElementById('newAnswer');
-    const pairsContainer = document.getElementById('pairsContainer');
     
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImage');
@@ -978,13 +466,14 @@
         let time = new Date().toLocaleTimeString([],{hour:'2-digit', minute:'2-digit'});
         
         if(imgData) {
+            const filename = `megamind_${Date.now()}.png`;
             msgDiv.innerHTML = `
                 <div class="msg-bubble">
                     <div>${escapeHtml(text)}</div>
                     <div class="img-container">
                         <img src="${imgData}" class="img-preview" onclick="window.openFullImage('${imgData}')">
                         <div class="img-buttons">
-                            <button class="img-btn" onclick="window.downloadImg('${imgData}', 'image_${Date.now()}.png')">💾 Скачать</button>
+                            <button class="img-btn" onclick="window.downloadImg('${imgData}', '${filename}')">💾 Скачать</button>
                             <button class="img-btn" onclick="window.openFullImage('${imgData}')">🖼️ Увеличить</button>
                         </div>
                     </div>
@@ -993,7 +482,7 @@
             `;
         } else if (isCode) {
             let displayText = text.includes('```') ? text : '```\n' + text + '\n```';
-            msgDiv.innerHTML = `<div class="msg-bubble"><div class="code-block"><pre>${escapeHtml(displayText)}</pre></div></div><div class="msg-meta">MegaMind AI • ${time}</div>`;
+            msgDiv.innerHTML = `<div class="msg-bubble"><div class="code-block"><pre>${escapeHtml(displayText)}</pre></div></div><div class="msg-meta">MegaMind AI (код) • ${time}</div>`;
         } else {
             msgDiv.innerHTML = `<div class="msg-bubble"><pre style="margin:0; white-space:pre-wrap;">${escapeHtml(text)}</pre></div><div class="msg-meta">${isUser ? 'Вы' : 'MegaMind AI'} • ${time}</div>`;
         }
@@ -1006,7 +495,7 @@
         link.href = data;
         link.download = filename;
         link.click();
-        addSystemMessage(`✅ Сохранено!`);
+        addSystemMessage(`✅ Изображение сохранено!`);
     };
     
     window.openFullImage = function(data) {
@@ -1047,14 +536,15 @@
     function addOrUpdateTopic(q,a) {
         if(!q.trim() || !a.trim()) return;
         let found = false;
+        let lowerQ = q.toLowerCase();
         for(let t of currentTopics) {
-            if(t.keywords.some(kw => q.toLowerCase().includes(kw))) {
+            if(t.keywords.some(kw => lowerQ.includes(kw))) {
                 t.answers.push(a);
                 found = true;
                 break;
             }
         }
-        if(!found) currentTopics.push({ name: q.substring(0,20), keywords: tokenize(q).slice(0,3), answers: [a] });
+        if(!found) currentTopics.push({ name: q.substring(0,25), keywords: tokenize(q).slice(0,3), answers: [a] });
         saveTopicsToStorage();
         renderPairsList();
         trainNeuralNet(true);
@@ -1065,7 +555,7 @@
         let total = currentTopics.reduce((s,t)=>s+t.answers.length,0);
         document.getElementById('totalAnswersCount').innerText = total;
         pairsContainer.innerHTML = '';
-        for(let i=0;i<Math.min(currentTopics.length,8);i++) {
+        for(let i=0;i<Math.min(currentTopics.length,12);i++) {
             let t = currentTopics[i];
             pairsContainer.innerHTML += `<div class="pair-item"><div class="pair-question">📌 ${escapeHtml(t.name)}</div><div class="pair-answer">📝 ${t.answers.length} ответов</div><button class="delete-topic" data-index="${i}">🗑️</button></div>`;
         }
@@ -1084,9 +574,9 @@
         currentTopics = buildLargeTopics();
     }
     
-    function resetToDefault() { currentTopics = buildLargeTopics(); saveTopicsToStorage(); renderPairsList(); trainNeuralNet(true); addSystemMessage("🔄 Сброшено!"); }
-    function exportData() { let blob = new Blob([JSON.stringify({topics: currentTopics}, null, 2)], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "megamind_backup.json"; a.click(); addSystemMessage("💾 Экспорт!"); }
-    function importData(file) { let reader = new FileReader(); reader.onload = e => { try { let imp = JSON.parse(e.target.result); if(imp.topics) { currentTopics = imp.topics; saveTopicsToStorage(); renderPairsList(); trainNeuralNet(true); addSystemMessage("📂 Импорт!"); } } catch(err) { addSystemMessage("❌ Ошибка"); } }; reader.readAsText(file); }
+    function resetToDefault() { currentTopics = buildLargeTopics(); saveTopicsToStorage(); renderPairsList(); trainNeuralNet(true); addSystemMessage("🔄 Сброшено к заводской базе!"); }
+    function exportData() { let blob = new Blob([JSON.stringify({topics: currentTopics}, null, 2)], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "megamind_backup.json"; a.click(); addSystemMessage("💾 Экспорт выполнен!"); }
+    function importData(file) { let reader = new FileReader(); reader.onload = e => { try { let imp = JSON.parse(e.target.result); if(imp.topics) { currentTopics = imp.topics; saveTopicsToStorage(); renderPairsList(); trainNeuralNet(true); addSystemMessage("📂 Импорт успешен!"); } else addSystemMessage("❌ Неверный формат"); } catch(err) { addSystemMessage("❌ Ошибка импорта"); } }; reader.readAsText(file); }
     
     window.addEventListener('DOMContentLoaded', async () => {
         loadTopicsFromStorage();
