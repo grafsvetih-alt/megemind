@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes, viewport-fit=cover">
-    <title>MegaMind AI — адаптивная нейросеть | Телефон, планшет, ПК</title>
+    <title>MegaMind AI — мобильная версия | 4 режима сверху</title>
     <script src="https://cdn.jsdelivr.net/npm/brain.js@2.0.0-beta.23/dist/browser.js"></script>
     <style>
         * {
@@ -13,7 +13,6 @@
             font-family: 'Segoe UI', 'Fira Code', -apple-system, BlinkMacSystemFont, 'Roboto', sans-serif;
         }
 
-        /* Основные переменные */
         :root {
             --bg-start: #1a1030;
             --bg-end: #0a0618;
@@ -28,13 +27,12 @@
             --user-msg-bg: #6b21a5;
             --bot-msg-bg: #1e1a3a;
             --border-radius: 20px;
-            --spacing: 16px;
         }
 
         body {
             background: radial-gradient(circle at 10% 20%, var(--bg-start), var(--bg-end));
             min-height: 100vh;
-            padding: 12px;
+            padding: 10px;
         }
 
         .app-window {
@@ -42,26 +40,99 @@
             margin: 0 auto;
             background: var(--panel-bg);
             backdrop-filter: blur(14px);
-            border-radius: 32px;
+            border-radius: 28px;
             display: flex;
+            flex-direction: column;
             overflow: hidden;
             border: 1px solid var(--accent);
             box-shadow: 0 30px 60px rgba(0, 0, 0, 0.5);
-            height: calc(100vh - 24px);
+            min-height: calc(100vh - 20px);
+        }
+
+        /* ========== МОБИЛЬНАЯ ШАПКА С 4 КНОПКАМИ ========== */
+        .mobile-mode-bar {
+            background: rgba(0, 0, 0, 0.5);
+            padding: 10px 12px;
+            border-bottom: 1px solid var(--accent);
+            display: none;
+        }
+
+        .mode-buttons-row {
+            display: flex;
+            gap: 8px;
+            justify-content: space-around;
+            flex-wrap: wrap;
+        }
+
+        .mode-btn-mobile {
+            background: #2d235a;
+            padding: 8px 12px;
+            font-size: 0.7rem;
+            cursor: pointer;
+            border-radius: 30px;
+            border: none;
+            color: var(--text-light);
+            font-weight: bold;
+            transition: all 0.2s;
+            flex: 1;
+            text-align: center;
+            min-width: 70px;
+        }
+
+        .mode-btn-mobile.active {
+            background: var(--accent);
+            color: #1a1a2e;
+            box-shadow: 0 0 8px rgba(168,85,247,0.5);
+        }
+
+        .mode-btn-mobile:active {
+            transform: scale(0.97);
+        }
+
+        /* ========== ПАНЕЛЬ ОБУЧЕНИЯ (на телефоне скрыта за кнопкой) ========== */
+        .training-panel {
+            background: rgba(10, 6, 25, 0.95);
+            border-bottom: 1px solid var(--accent);
+            padding: 14px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
             transition: all 0.3s ease;
         }
 
-        /* Панель обучения - десктопная версия */
-        .training-panel {
-            width: 360px;
-            background: rgba(10, 6, 25, 0.85);
+        /* Десктопная версия панели */
+        .training-panel.desktop {
+            width: 340px;
             border-right: 1px solid var(--accent);
-            padding: 20px 16px;
-            display: flex;
-            flex-direction: column;
-            gap: 18px;
+            border-bottom: none;
             overflow-y: auto;
-            transition: transform 0.3s ease;
+        }
+
+        /* Мобильная версия — сворачиваемая */
+        .training-panel.mobile {
+            width: 100%;
+            max-height: 0;
+            padding: 0 14px;
+            overflow: hidden;
+            border-bottom: none;
+        }
+
+        .training-panel.mobile.open {
+            max-height: 400px;
+            padding: 14px;
+            border-bottom: 1px solid var(--accent);
+            overflow-y: auto;
+        }
+
+        .toggle-panel-btn {
+            background: var(--accent-dark);
+            width: 100%;
+            text-align: center;
+            padding: 8px;
+            font-size: 0.7rem;
+            border-radius: 30px;
+            margin-top: 5px;
+            display: none;
         }
 
         /* Основная область чата */
@@ -75,77 +146,70 @@
 
         /* Шапка чата */
         .chat-header {
-            padding: 16px 20px;
+            padding: 12px 16px;
             background: rgba(0, 0, 0, 0.4);
             border-bottom: 1px solid var(--accent);
             display: flex;
             justify-content: space-between;
             align-items: center;
             flex-wrap: wrap;
-            gap: 12px;
+            gap: 8px;
         }
 
         .chat-header h1 {
-            font-size: 1.1rem;
+            font-size: 1rem;
             color: var(--text-light);
             display: flex;
             align-items: center;
-            gap: 10px;
-            flex-wrap: wrap;
+            gap: 8px;
         }
 
         .current-mode-badge {
             background: var(--accent);
             color: #1a1a2e;
-            padding: 4px 12px;
+            padding: 3px 10px;
             border-radius: 30px;
-            font-size: 0.7rem;
+            font-size: 0.65rem;
             font-weight: bold;
         }
 
         .export-buttons {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
+            gap: 6px;
         }
 
         .export-buttons button,
         .export-buttons label {
             background: var(--accent-dark);
-            font-size: 0.65rem;
-            padding: 6px 12px;
+            font-size: 0.6rem;
+            padding: 5px 10px;
             cursor: pointer;
+            border-radius: 30px;
         }
 
         /* Область сообщений */
         .chat-messages {
             flex: 1;
             overflow-y: auto;
-            padding: 16px 20px;
+            padding: 14px;
             display: flex;
             flex-direction: column;
-            gap: 14px;
+            gap: 12px;
         }
 
-        /* Сообщения */
         .message {
             display: flex;
             flex-direction: column;
-            max-width: 85%;
+            max-width: 90%;
             animation: fadeIn 0.2s ease;
         }
 
-        .user-msg {
-            align-self: flex-end;
-        }
-
-        .bot-msg {
-            align-self: flex-start;
-        }
+        .user-msg { align-self: flex-end; }
+        .bot-msg { align-self: flex-start; }
 
         .msg-bubble {
-            padding: 10px 16px;
-            border-radius: 24px;
+            padding: 10px 14px;
+            border-radius: 22px;
             background: #2d235a;
             color: var(--text-light);
             word-break: break-word;
@@ -167,12 +231,12 @@
         /* Код-блоки */
         .code-block {
             background: #0f0a2a;
-            padding: 10px;
+            padding: 8px;
             border-radius: 14px;
             overflow-x: auto;
             font-family: 'Fira Code', monospace;
             font-size: 0.7rem;
-            margin-top: 8px;
+            margin-top: 6px;
             border: 1px solid var(--accent);
         }
 
@@ -183,33 +247,23 @@
         }
 
         /* Изображения */
-        .img-container {
-            margin-top: 10px;
-        }
-
+        .img-container { margin-top: 8px; }
         .img-preview {
             max-width: 100%;
-            max-height: 280px;
+            max-height: 240px;
             border-radius: 16px;
             border: 2px solid var(--accent);
             cursor: pointer;
-            transition: transform 0.2s;
         }
-
-        .img-preview:hover {
-            transform: scale(1.02);
-        }
-
         .img-buttons {
             display: flex;
             gap: 8px;
-            margin-top: 8px;
+            margin-top: 6px;
             flex-wrap: wrap;
         }
-
         .img-btn {
             background: #2d235a;
-            padding: 4px 12px;
+            padding: 4px 10px;
             font-size: 0.6rem;
             border-radius: 30px;
             cursor: pointer;
@@ -217,189 +271,122 @@
             color: var(--text-light);
         }
 
-        .img-btn:hover {
-            background: var(--accent);
-            color: #1a1a2e;
-        }
-
-        /* Панель выбора режима */
-        .mode-selector {
+        /* Элементы панели */
+        .stats-area, .mode-selector, .add-pair-form {
             background: var(--card-bg);
             border-radius: var(--border-radius);
-            padding: 12px;
+            padding: 10px;
             border: 1px solid var(--accent);
         }
+        .stats-number { font-size: 1.3rem; font-weight: bold; color: var(--accent-light); }
+        .stats-label { font-size: 0.6rem; color: var(--text-muted); }
+        .mode-selector h3, .add-pair-form h3 { font-size: 0.7rem; margin-bottom: 8px; color: var(--text-muted); }
 
-        .mode-selector h3 {
-            font-size: 0.75rem;
-            margin-bottom: 10px;
-            color: var(--text-muted);
-        }
-
-        .mode-buttons {
+        .mode-buttons-desktop {
             display: flex;
             gap: 8px;
             flex-wrap: wrap;
         }
-
-        .mode-btn {
+        .mode-btn-desktop {
             background: #2d235a;
-            padding: 8px 12px;
-            font-size: 0.7rem;
-            cursor: pointer;
+            padding: 6px 10px;
+            font-size: 0.65rem;
             border-radius: 30px;
             border: none;
             color: var(--text-light);
             font-weight: bold;
-            transition: all 0.2s;
+            cursor: pointer;
             flex: 1;
-            min-width: 90px;
             text-align: center;
         }
-
-        .mode-btn.active {
+        .mode-btn-desktop.active {
             background: var(--accent);
             color: #1a1a2e;
-            box-shadow: 0 0 8px rgba(168,85,247,0.5);
         }
 
-        .mode-btn:active {
-            transform: scale(0.97);
-        }
-
-        /* Панель добавления ответов */
-        .add-pair-form {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 12px;
-            border: 1px solid var(--accent);
-        }
-
-        .add-pair-form h3 {
-            font-size: 0.75rem;
-            margin-bottom: 10px;
-            color: var(--text-muted);
-        }
-
-        .input-group {
-            margin-bottom: 10px;
-        }
-
-        .input-group input,
-        .input-group textarea {
+        .input-group { margin-bottom: 8px; }
+        .input-group input, .input-group textarea {
             width: 100%;
             background: var(--input-bg);
             border: 1px solid var(--accent);
             border-radius: 14px;
             padding: 8px 12px;
             color: var(--text-light);
-            font-size: 0.8rem;
-            resize: vertical;
-        }
-
-        .input-group input:focus,
-        .input-group textarea:focus {
-            outline: none;
-            border-color: var(--accent-light);
-        }
-
-        /* Статистика */
-        .stats-area {
-            background: var(--card-bg);
-            border-radius: var(--border-radius);
-            padding: 10px;
-            text-align: center;
-            border: 1px solid var(--accent);
-        }
-
-        .stats-number {
-            font-size: 1.4rem;
-            font-weight: bold;
-            color: var(--accent-light);
-        }
-
-        .stats-label {
-            font-size: 0.6rem;
-            color: var(--text-muted);
-        }
-
-        /* Ввод сообщения */
-        .input-area {
-            padding: 14px 20px;
-            background: #0f0a1a;
-            display: flex;
-            gap: 10px;
-            border-top: 1px solid var(--accent);
-        }
-
-        #userInput {
-            flex: 1;
-            background: var(--input-bg);
-            border: 1px solid var(--accent);
-            border-radius: 60px;
-            padding: 12px 18px;
-            color: var(--text-light);
-            font-size: 0.85rem;
-        }
-
-        #sendBtn {
-            padding: 0 18px;
-            white-space: nowrap;
+            font-size: 0.75rem;
         }
 
         button {
             background: linear-gradient(95deg, var(--accent), var(--accent-dark));
             border: none;
-            padding: 8px 14px;
+            padding: 6px 12px;
             border-radius: 40px;
             font-weight: bold;
             color: white;
             cursor: pointer;
             transition: 0.2s;
-            font-size: 0.75rem;
+            font-size: 0.7rem;
         }
+        button:active { transform: scale(0.97); }
 
-        button:active {
-            transform: scale(0.97);
-        }
-
-        .train-btn {
-            background: linear-gradient(95deg, #8b5cf6, #5b21b6);
-            width: 100%;
-        }
-
+        .train-btn { width: 100%; }
         .status-area {
             background: #0f0a1a;
             border-radius: var(--border-radius);
-            padding: 8px;
-            font-size: 0.65rem;
+            padding: 6px;
+            font-size: 0.6rem;
             text-align: center;
             color: var(--text-muted);
         }
-
         .pairs-list {
-            max-height: 140px;
+            max-height: 120px;
             overflow-y: auto;
-            font-size: 0.65rem;
+            font-size: 0.6rem;
         }
-
         .pair-item {
             background: #0f0a2a;
-            border-radius: 14px;
-            padding: 6px;
-            margin-bottom: 6px;
+            border-radius: 12px;
+            padding: 5px;
+            margin-bottom: 5px;
             border-left: 3px solid var(--accent);
         }
-
         .delete-topic {
             background: #5e2e42;
-            padding: 2px 8px;
+            padding: 2px 6px;
             border-radius: 30px;
             font-size: 0.5rem;
-            margin-top: 4px;
+            margin-top: 3px;
         }
 
-        /* Модальное окно */
+        .input-area {
+            padding: 12px;
+            background: #0f0a1a;
+            display: flex;
+            gap: 8px;
+            border-top: 1px solid var(--accent);
+        }
+        #userInput {
+            flex: 1;
+            background: var(--input-bg);
+            border: 1px solid var(--accent);
+            border-radius: 60px;
+            padding: 10px 16px;
+            color: var(--text-light);
+            font-size: 0.8rem;
+        }
+        #sendBtn { padding: 0 16px; white-space: nowrap; }
+
+        .loading-spinner {
+            display: inline-block;
+            width: 16px;
+            height: 16px;
+            border: 2px solid #fff;
+            border-top-color: var(--accent);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 6px;
+            vertical-align: middle;
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -412,321 +399,168 @@
             justify-content: center;
             align-items: center;
         }
-
-        .modal-content {
-            max-width: 90%;
-            max-height: 90%;
-            border-radius: 20px;
-            border: 2px solid var(--accent);
-        }
-
+        .modal-content { max-width: 90%; max-height: 90%; border-radius: 20px; border: 2px solid var(--accent); }
         .close-modal {
             position: absolute;
-            top: 20px;
-            right: 35px;
+            top: 15px;
+            right: 25px;
             color: var(--text-muted);
-            font-size: 40px;
+            font-size: 35px;
             cursor: pointer;
         }
 
-        .loading-spinner {
-            display: inline-block;
-            width: 18px;
-            height: 18px;
-            border: 2px solid #fff;
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
 
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(5px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        /* СКРОЛЛБАРЫ */
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-track { background: var(--input-bg); }
         ::-webkit-scrollbar-thumb { background: var(--accent); border-radius: 10px; }
 
-        /* ========== АДАПТИВНОСТЬ ========== */
-
-        /* ПЛАНШЕТЫ (768px - 1024px) */
-        @media (max-width: 1024px) and (min-width: 768px) {
+        /* ========== ДЕСКТОПНАЯ ВЕРСИЯ (> 768px) ========== */
+        @media (min-width: 768px) {
             .app-window {
-                flex-direction: column;
-                height: auto;
-                min-height: calc(100vh - 24px);
-            }
-
-            .training-panel {
-                width: 100%;
-                max-height: 280px;
                 flex-direction: row;
-                flex-wrap: wrap;
-                gap: 12px;
-                border-right: none;
-                border-bottom: 1px solid var(--accent);
-                padding: 14px;
+                height: calc(100vh - 20px);
             }
-
-            .training-panel > * {
-                flex: 1;
-                min-width: 200px;
+            .mobile-mode-bar {
+                display: none !important;
             }
-
-            .pairs-list {
-                max-height: 100px;
+            .training-panel.desktop {
+                display: flex !important;
             }
-
-            .chat-header h1 {
-                font-size: 1rem;
+            .training-panel.mobile {
+                display: none !important;
             }
-
-            .mode-buttons {
-                flex-wrap: wrap;
+            .toggle-panel-btn {
+                display: none !important;
             }
-
-            .mode-btn {
-                min-width: 80px;
-                padding: 6px 10px;
-                font-size: 0.65rem;
+            .mode-buttons-desktop {
+                display: flex !important;
             }
         }
 
-        /* ТЕЛЕФОНЫ (до 767px) */
+        /* ========== МОБИЛЬНАЯ ВЕРСИЯ (< 768px) ========== */
         @media (max-width: 767px) {
-            body {
-                padding: 8px;
+            .training-panel.desktop {
+                display: none !important;
             }
-
-            .app-window {
-                flex-direction: column;
-                height: auto;
-                min-height: calc(100vh - 16px);
-                border-radius: 24px;
+            .training-panel.mobile {
+                display: flex !important;
             }
-
-            /* Панель управления — вверху, сворачиваемая */
-            .training-panel {
-                width: 100%;
-                max-height: 260px;
-                border-right: none;
-                border-bottom: 1px solid var(--accent);
-                padding: 12px;
-                gap: 10px;
-                overflow-y: auto;
-                order: -1;
+            .mobile-mode-bar {
+                display: block !important;
             }
-
-            /* Группировка элементов панели */
-            .stats-area {
-                padding: 6px;
+            .mode-buttons-desktop {
+                display: none !important;
             }
-
-            .stats-number {
-                font-size: 1.2rem;
+            .toggle-panel-btn {
+                display: block !important;
             }
-
-            .mode-selector {
-                padding: 10px;
-            }
-
-            .mode-buttons {
-                gap: 6px;
-            }
-
-            .mode-btn {
-                min-width: 70px;
-                padding: 6px 8px;
-                font-size: 0.6rem;
-            }
-
-            .add-pair-form {
-                padding: 10px;
-            }
-
-            .add-pair-form h3 {
-                font-size: 0.7rem;
-            }
-
-            .input-group input,
-            .input-group textarea {
-                font-size: 0.75rem;
-                padding: 6px 10px;
-            }
-
-            /* Чат */
-            .chat-header {
-                padding: 12px 14px;
-            }
-
             .chat-header h1 {
-                font-size: 0.9rem;
+                font-size: 0.85rem;
             }
-
             .current-mode-badge {
-                font-size: 0.6rem;
-                padding: 3px 8px;
+                font-size: 0.55rem;
+                padding: 2px 8px;
             }
-
             .export-buttons button,
             .export-buttons label {
-                font-size: 0.6rem;
-                padding: 4px 10px;
-            }
-
-            .chat-messages {
-                padding: 12px;
-            }
-
-            .message {
-                max-width: 95%;
-            }
-
-            .msg-bubble {
-                padding: 8px 12px;
-                font-size: 0.8rem;
-            }
-
-            .code-block {
-                font-size: 0.65rem;
-                padding: 8px;
-            }
-
-            .img-preview {
-                max-height: 200px;
-            }
-
-            .input-area {
-                padding: 10px 14px;
-                gap: 8px;
-            }
-
-            #userInput {
-                padding: 10px 14px;
-                font-size: 0.8rem;
-            }
-
-            #sendBtn {
-                padding: 0 14px;
-                font-size: 0.7rem;
-            }
-
-            button {
-                padding: 6px 12px;
-                font-size: 0.7rem;
-            }
-
-            .status-area {
-                font-size: 0.6rem;
-            }
-
-            .close-modal {
-                top: 10px;
-                right: 20px;
-                font-size: 30px;
-            }
-        }
-
-        /* ОЧЕНЬ МАЛЕНЬКИЕ ТЕЛЕФОНЫ (до 480px) */
-        @media (max-width: 480px) {
-            .training-panel {
-                max-height: 280px;
-            }
-
-            .mode-btn {
-                min-width: 55px;
                 font-size: 0.55rem;
-                padding: 5px 6px;
+                padding: 4px 8px;
             }
-
-            .chat-header {
-                flex-direction: column;
-                align-items: flex-start;
-            }
-
-            .export-buttons {
-                width: 100%;
-                justify-content: flex-start;
-            }
-
             .msg-bubble {
-                font-size: 0.75rem;
+                font-size: 0.8rem;
+                padding: 8px 12px;
             }
-        }
-
-        /* ДЕСКТОПЫ (более 1200px) */
-        @media (min-width: 1400px) {
-            .app-window {
-                max-width: 1600px;
+            .code-block {
+                font-size: 0.6rem;
             }
-
-            .training-panel {
-                width: 400px;
-            }
-
-            .msg-bubble {
-                font-size: 0.9rem;
+            .img-preview {
+                max-height: 180px;
             }
         }
     </style>
 </head>
 <body>
 <div class="app-window">
-    <div class="training-panel">
-        <div class="panel-header" style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); padding-bottom: 8px;">
-            <h2 style="color: var(--text-light); font-size: 0.9rem;">🧠 MegaMind AI <span style="background: var(--accent-dark); padding: 2px 8px; border-radius: 20px; font-size: 0.55rem;">адаптивный</span></h2>
-            <button id="resetDataBtn" style="background:#4e2c3e;">Сброс</button>
+    <!-- Мобильная шапка с 4 кнопками (только на телефоне) -->
+    <div class="mobile-mode-bar">
+        <div class="mode-buttons-row">
+            <button class="mode-btn-mobile" data-mode="text">📝 Текст</button>
+            <button class="mode-btn-mobile" data-mode="code">💻 Код</button>
+            <button class="mode-btn-mobile" data-mode="imageCanvas">🎨 Canvas</button>
+            <button class="mode-btn-mobile" data-mode="imageAI">🤖 AI</button>
         </div>
-
-        <div class="stats-area">
-            <div class="stats-number" id="totalAnswersCount">0</div>
-            <div class="stats-label">всего ответов</div>
-        </div>
-
-        <div class="mode-selector">
-            <h3>🎛️ РЕЖИМЫ</h3>
-            <div class="mode-buttons">
-                <button id="modeText" class="mode-btn" data-mode="text">📝 ТЕКСТ</button>
-                <button id="modeCode" class="mode-btn" data-mode="code">💻 КОД</button>
-                <button id="modeImageCanvas" class="mode-btn" data-mode="imageCanvas">🎨 CANVAS</button>
-                <button id="modeImageAI" class="mode-btn" data-mode="imageAI">🤖 AI</button>
-            </div>
-            <div class="status-area" id="modeStatus" style="margin-top: 6px;">⚡ Режим: ТЕКСТ</div>
-        </div>
-
-        <div class="add-pair-form">
-            <h3>➕ Добавить свой ответ</h3>
-            <div class="input-group"><input type="text" id="newQuestion" placeholder="Ключевое слово (анекдот, факт...)"></div>
-            <div class="input-group"><textarea id="newAnswer" rows="2" placeholder="Ваш ответ"></textarea></div>
-            <button id="addPairBtn">📚 Добавить</button>
-        </div>
-        
-        <button id="trainNowBtn" class="train-btn">⚙️ Переобучить</button>
-        <div class="status-area" id="trainStatus">🧠 Готово</div>
-        <div><h3 style="font-size:0.65rem; color:var(--text-muted);">📚 Темы</h3>
-        <div id="pairsContainer" class="pairs-list"></div></div>
     </div>
 
+    <!-- Десктопная панель обучения -->
+    <div class="training-panel desktop">
+        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); padding-bottom: 8px;">
+            <h2 style="color: var(--text-light); font-size: 0.9rem;">🧠 MegaMind AI</h2>
+            <button id="resetDataBtnDesktop" style="background:#4e2c3e;">Сброс</button>
+        </div>
+        <div class="stats-area">
+            <div class="stats-number" id="totalAnswersCountDesktop">0</div>
+            <div class="stats-label">всего ответов</div>
+        </div>
+        <div class="mode-selector">
+            <h3>🎛️ РЕЖИМЫ</h3>
+            <div class="mode-buttons-desktop">
+                <button class="mode-btn-desktop" data-mode="text">📝 ТЕКСТ</button>
+                <button class="mode-btn-desktop" data-mode="code">💻 КОД</button>
+                <button class="mode-btn-desktop" data-mode="imageCanvas">🎨 CANVAS</button>
+                <button class="mode-btn-desktop" data-mode="imageAI">🤖 AI</button>
+            </div>
+            <div class="status-area" id="modeStatusDesktop" style="margin-top: 6px;">⚡ Режим: ТЕКСТ</div>
+        </div>
+        <div class="add-pair-form">
+            <h3>➕ Добавить свой ответ</h3>
+            <div class="input-group"><input type="text" id="newQuestionDesktop" placeholder="Ключевое слово"></div>
+            <div class="input-group"><textarea id="newAnswerDesktop" rows="2" placeholder="Ваш ответ"></textarea></div>
+            <button id="addPairBtnDesktop">📚 Добавить</button>
+        </div>
+        <button id="trainNowBtnDesktop" class="train-btn">⚙️ Переобучить</button>
+        <div class="status-area" id="trainStatusDesktop">🧠 Готово</div>
+        <div><h3 style="font-size:0.65rem; color:var(--text-muted);">📚 Темы</h3>
+        <div id="pairsContainerDesktop" class="pairs-list"></div></div>
+    </div>
+
+    <!-- Мобильная панель (сворачиваемая) -->
+    <div class="training-panel mobile" id="mobilePanel">
+        <div style="display: flex; justify-content: space-between; border-bottom: 2px solid var(--accent); padding-bottom: 6px;">
+            <h2 style="color: var(--text-light); font-size: 0.85rem;">🧠 Настройки</h2>
+            <button id="resetDataBtnMobile" style="background:#4e2c3e; font-size:0.65rem;">Сброс</button>
+        </div>
+        <div class="stats-area">
+            <div class="stats-number" id="totalAnswersCountMobile">0</div>
+            <div class="stats-label">всего ответов</div>
+        </div>
+        <div class="add-pair-form">
+            <h3>➕ Добавить свой ответ</h3>
+            <div class="input-group"><input type="text" id="newQuestionMobile" placeholder="Ключевое слово"></div>
+            <div class="input-group"><textarea id="newAnswerMobile" rows="2" placeholder="Ваш ответ"></textarea></div>
+            <button id="addPairBtnMobile">📚 Добавить</button>
+        </div>
+        <button id="trainNowBtnMobile" class="train-btn">⚙️ Переобучить</button>
+        <div class="status-area" id="trainStatusMobile">🧠 Готово</div>
+        <div><h3 style="font-size:0.65rem; color:var(--text-muted);">📚 Темы</h3>
+        <div id="pairsContainerMobile" class="pairs-list"></div></div>
+    </div>
+    <button class="toggle-panel-btn" id="togglePanelBtn">📂 Показать настройки</button>
+
+    <!-- Чат -->
     <div class="chat-area">
         <div class="chat-header">
             <h1>🧠 MegaMind AI <span id="currentModeDisplay" class="current-mode-badge">📝 Текст</span></h1>
             <div class="export-buttons">
                 <button id="exportBtn">💾 Экспорт</button>
-                <label for="importFileInput" style="background: var(--accent-dark); padding: 6px 12px; border-radius: 40px; font-size:0.65rem; cursor:pointer;">📂 Импорт</label>
+                <label for="importFileInput" style="background: var(--accent-dark); padding: 5px 10px; border-radius: 30px; font-size:0.6rem; cursor:pointer;">📂 Импорт</label>
                 <input type="file" id="importFileInput" accept=".json" style="display:none">
             </div>
         </div>
         <div class="chat-messages" id="chatMessages">
             <div class="message bot-msg">
-                <div class="msg-bubble">🧠 <b>MegaMind AI</b> — выбери режим кнопками!<br>
+                <div class="msg-bubble">🧠 <b>MegaMind AI</b><br>
                 🔥 Примеры:<br>
                 • <b>ТЕКСТ</b> — "анекдот", "факт", "совет"<br>
                 • <b>КОД</b> — "калькулятор на python"<br>
@@ -736,7 +570,7 @@
             </div>
         </div>
         <div class="input-area">
-            <input type="text" id="userInput" placeholder="Напиши: анекдот, факт, или калькулятор на python..." autocomplete="off">
+            <input type="text" id="userInput" placeholder="Напиши: анекдот, или калькулятор на python..." autocomplete="off">
             <button id="sendBtn">→</button>
         </div>
     </div>
@@ -748,47 +582,57 @@
 </div>
 
 <script>
-    // ==================== АДАПТИВНАЯ ВЕРСИЯ — ВСЯ ЛОГИКА СОХРАНЕНА ====================
+    // ==================== ОБЩАЯ ЛОГИКА ====================
     let currentMode = 'text';
     let neuralNetwork = null;
     let currentTopics = [];
     let globalVocabulary = [];
     let isTraining = false;
-    
+    let mobilePanelOpen = false;
+
+    // Функция обновления режима
     function setMode(mode) {
         currentMode = mode;
-        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
+        
+        // Обновляем все кнопки режимов (мобильные и десктопные)
+        document.querySelectorAll('.mode-btn-mobile, .mode-btn-desktop').forEach(btn => {
+            btn.classList.remove('active');
+            if (btn.dataset.mode === mode) btn.classList.add('active');
+        });
+        
         let modeText = '';
-        if (mode === 'text') {
-            document.getElementById('modeText').classList.add('active');
-            modeText = '📝 ТЕКСТ';
-            document.getElementById('currentModeDisplay').innerHTML = '📝 Текст';
-        } else if (mode === 'code') {
-            document.getElementById('modeCode').classList.add('active');
-            modeText = '💻 КОД';
-            document.getElementById('currentModeDisplay').innerHTML = '💻 Код';
-        } else if (mode === 'imageCanvas') {
-            document.getElementById('modeImageCanvas').classList.add('active');
-            modeText = '🎨 CANVAS';
-            document.getElementById('currentModeDisplay').innerHTML = '🎨 Canvas';
-        } else if (mode === 'imageAI') {
-            document.getElementById('modeImageAI').classList.add('active');
-            modeText = '🤖 AI ИЗОБРАЖЕНИЯ';
-            document.getElementById('currentModeDisplay').innerHTML = '🤖 AI';
-        }
-        document.getElementById('modeStatus').innerHTML = `✅ Режим: ${modeText}`;
+        if (mode === 'text') modeText = '📝 Текст';
+        else if (mode === 'code') modeText = '💻 Код';
+        else if (mode === 'imageCanvas') modeText = '🎨 Canvas';
+        else if (mode === 'imageAI') modeText = '🤖 AI';
+        
+        document.getElementById('currentModeDisplay').innerHTML = modeText;
+        
+        const modeStatus = document.getElementById('modeStatusDesktop');
+        if (modeStatus) modeStatus.innerHTML = `✅ Режим: ${modeText.toUpperCase()}`;
     }
-    
-    document.getElementById('modeText').addEventListener('click', () => setMode('text'));
-    document.getElementById('modeCode').addEventListener('click', () => setMode('code'));
-    document.getElementById('modeImageCanvas').addEventListener('click', () => setMode('imageCanvas'));
-    document.getElementById('modeImageAI').addEventListener('click', () => setMode('imageAI'));
-    
-    // ==================== ВСПОМОГАТЕЛЬНЫЕ ФУНКЦИИ ====================
-    function getRandomSeed() { return Math.floor(Math.random() * 1000000); }
-    function hashCode(str, seed = 0) { let hash = seed; for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; } return Math.abs(hash); }
-    function seededRandom(hash, step) { return ((hash + step) % 0x7fffffff) / 0x7fffffff; }
-    
+
+    // Обработчики кнопок режимов
+    document.querySelectorAll('.mode-btn-mobile, .mode-btn-desktop').forEach(btn => {
+        btn.addEventListener('click', () => setMode(btn.dataset.mode));
+    });
+
+    // Тогглер мобильной панели
+    const toggleBtn = document.getElementById('togglePanelBtn');
+    const mobilePanel = document.getElementById('mobilePanel');
+    if (toggleBtn) {
+        toggleBtn.addEventListener('click', () => {
+            mobilePanelOpen = !mobilePanelOpen;
+            if (mobilePanelOpen) {
+                mobilePanel.classList.add('open');
+                toggleBtn.innerHTML = '📂 Скрыть настройки';
+            } else {
+                mobilePanel.classList.remove('open');
+                toggleBtn.innerHTML = '📂 Показать настройки';
+            }
+        });
+    }
+
     // ==================== БАЗА ТЕКСТОВЫХ ОТВЕТОВ ====================
     function buildLargeTopics() {
         const topics = [];
@@ -816,7 +660,7 @@
         
         return topics;
     }
-    
+
     function tokenize(text) { if(!text) return []; let c = text.toLowerCase().replace(/[^\w\sа-яё]/gi, ' '); return c.split(/\s+/).filter(w=>w.length); }
     function buildGlobalVocabulary(topics) { let set=new Set(); for(let t of topics) for(let kw of t.keywords) tokenize(kw).forEach(w=>set.add(w)); return Array.from(set).sort(); }
     function encodeQuestion(q, vocab) { let tokens=new Set(tokenize(q)); return vocab.map(w=>tokens.has(w)?1:0); }
@@ -829,13 +673,13 @@
         let brainData = prepareBrainData(currentTopics, globalVocabulary);
         if(!brainData.length) return false;
         isTraining = true;
-        document.getElementById('trainStatus').innerHTML = `🔄 Обучение...`;
+        updateTrainStatus("🔄 Обучение...");
         neuralNetwork = new brain.NeuralNetwork({ activation: 'sigmoid', hiddenLayers: [Math.min(40, Math.floor((globalVocabulary.length+currentTopics.length)*0.8)), Math.max(6, Math.floor(currentTopics.length*1.2))], learningRate: 0.5, momentum:0.2 });
         return new Promise((resolve)=>{
             neuralNetwork.train(brainData, { iterations: 500, errorThresh:0.02, log:false });
             let total = currentTopics.reduce((s,t)=>s+t.answers.length,0);
-            document.getElementById('totalAnswersCount').innerText = total;
-            document.getElementById('trainStatus').innerHTML = `✅ Готово! ${total} ответов`;
+            updateTotalCount(total);
+            updateTrainStatus(`✅ Готово! ${total} ответов`);
             isTraining = false;
             if(showMsg) addSystemMessage(`🧠 Нейросеть обучена! ${total} ответов.`);
             resolve(true);
@@ -868,6 +712,20 @@
         return topic.answers[Math.floor(Math.random() * topic.answers.length)];
     }
     
+    function updateTotalCount(total) {
+        ['totalAnswersCountDesktop', 'totalAnswersCountMobile'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerText = total;
+        });
+    }
+    
+    function updateTrainStatus(msg) {
+        ['trainStatusDesktop', 'trainStatusMobile'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.innerHTML = msg;
+        });
+    }
+    
     // ==================== ГЕНЕРАЦИЯ КОДА ====================
     async function generateCodeWithAI(prompt) {
         try {
@@ -892,6 +750,10 @@
     }
     
     // ==================== ГЕНЕРАЦИЯ ИЗОБРАЖЕНИЙ ====================
+    function getRandomSeed() { return Math.floor(Math.random() * 1000000); }
+    function hashCode(str, seed = 0) { let hash = seed; for (let i = 0; i < str.length; i++) { hash = ((hash << 5) - hash) + str.charCodeAt(i); hash |= 0; } return Math.abs(hash); }
+    function seededRandom(hash, step) { return ((hash + step) % 0x7fffffff) / 0x7fffffff; }
+    
     function generateCanvasImage(description) {
         const canvas = document.createElement('canvas');
         canvas.width = 400;
@@ -958,17 +820,11 @@
     const chatMessagesDiv = document.getElementById('chatMessages');
     const userInput = document.getElementById('userInput');
     const sendBtn = document.getElementById('sendBtn');
-    const addPairBtn = document.getElementById('addPairBtn');
-    const trainNowBtn = document.getElementById('trainNowBtn');
-    const resetDataBtn = document.getElementById('resetDataBtn');
     const exportBtn = document.getElementById('exportBtn');
     const importFileInput = document.getElementById('importFileInput');
-    const newQuestionInput = document.getElementById('newQuestion');
-    const newAnswerInput = document.getElementById('newAnswer');
-    const pairsContainer = document.getElementById('pairsContainer');
-    
     const modal = document.getElementById('imageModal');
     const modalImg = document.getElementById('modalImage');
+    
     document.querySelector('.close-modal').onclick = () => modal.style.display = 'none';
     modal.onclick = (e) => { if (e.target === modal) modal.style.display = 'none'; };
     
@@ -1056,23 +912,27 @@
         }
         if(!found) currentTopics.push({ name: q.substring(0,20), keywords: tokenize(q).slice(0,3), answers: [a] });
         saveTopicsToStorage();
-        renderPairsList();
+        renderAllPairsLists();
         trainNeuralNet(true);
     }
     
-    function renderPairsList() {
-        if(!pairsContainer) return;
+    function renderAllPairsLists() {
         let total = currentTopics.reduce((s,t)=>s+t.answers.length,0);
-        document.getElementById('totalAnswersCount').innerText = total;
-        pairsContainer.innerHTML = '';
-        for(let i=0;i<Math.min(currentTopics.length,8);i++) {
-            let t = currentTopics[i];
-            pairsContainer.innerHTML += `<div class="pair-item"><div class="pair-question">📌 ${escapeHtml(t.name)}</div><div class="pair-answer">📝 ${t.answers.length} ответов</div><button class="delete-topic" data-index="${i}">🗑️</button></div>`;
-        }
-        document.querySelectorAll('.delete-topic').forEach(btn=>{
-            btn.addEventListener('click',(e)=>{
-                let idx = parseInt(btn.dataset.index);
-                if(!isNaN(idx)) { currentTopics.splice(idx,1); saveTopicsToStorage(); renderPairsList(); trainNeuralNet(true); }
+        updateTotalCount(total);
+        
+        ['pairsContainerDesktop', 'pairsContainerMobile'].forEach(containerId => {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            container.innerHTML = '';
+            for(let i=0;i<Math.min(currentTopics.length,8);i++) {
+                let t = currentTopics[i];
+                container.innerHTML += `<div class="pair-item"><div class="pair-question">📌 ${escapeHtml(t.name)}</div><div class="pair-answer">📝 ${t.answers.length} ответов</div><button class="delete-topic" data-index="${i}">🗑️</button></div>`;
+            }
+            container.querySelectorAll('.delete-topic').forEach(btn=>{
+                btn.addEventListener('click',(e)=>{
+                    let idx = parseInt(btn.dataset.index);
+                    if(!isNaN(idx)) { currentTopics.splice(idx,1); saveTopicsToStorage(); renderAllPairsLists(); trainNeuralNet(true); }
+                });
             });
         });
     }
@@ -1084,22 +944,27 @@
         currentTopics = buildLargeTopics();
     }
     
-    function resetToDefault() { currentTopics = buildLargeTopics(); saveTopicsToStorage(); renderPairsList(); trainNeuralNet(true); addSystemMessage("🔄 Сброшено!"); }
+    function resetToDefault() { currentTopics = buildLargeTopics(); saveTopicsToStorage(); renderAllPairsLists(); trainNeuralNet(true); addSystemMessage("🔄 Сброшено!"); }
     function exportData() { let blob = new Blob([JSON.stringify({topics: currentTopics}, null, 2)], {type:"application/json"}); let a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = "megamind_backup.json"; a.click(); addSystemMessage("💾 Экспорт!"); }
-    function importData(file) { let reader = new FileReader(); reader.onload = e => { try { let imp = JSON.parse(e.target.result); if(imp.topics) { currentTopics = imp.topics; saveTopicsToStorage(); renderPairsList(); trainNeuralNet(true); addSystemMessage("📂 Импорт!"); } } catch(err) { addSystemMessage("❌ Ошибка"); } }; reader.readAsText(file); }
+    function importData(file) { let reader = new FileReader(); reader.onload = e => { try { let imp = JSON.parse(e.target.result); if(imp.topics) { currentTopics = imp.topics; saveTopicsToStorage(); renderAllPairsLists(); trainNeuralNet(true); addSystemMessage("📂 Импорт!"); } } catch(err) { addSystemMessage("❌ Ошибка"); } }; reader.readAsText(file); }
+    
+    // Обработчики кнопок (десктоп и мобиль)
+    document.getElementById('addPairBtnDesktop')?.addEventListener('click', () => { let q=document.getElementById('newQuestionDesktop').value.trim(), a=document.getElementById('newAnswerDesktop').value.trim(); if(q&&a) addOrUpdateTopic(q,a); document.getElementById('newQuestionDesktop').value=""; document.getElementById('newAnswerDesktop').value=""; });
+    document.getElementById('addPairBtnMobile')?.addEventListener('click', () => { let q=document.getElementById('newQuestionMobile').value.trim(), a=document.getElementById('newAnswerMobile').value.trim(); if(q&&a) addOrUpdateTopic(q,a); document.getElementById('newQuestionMobile').value=""; document.getElementById('newAnswerMobile').value=""; });
+    document.getElementById('trainNowBtnDesktop')?.addEventListener('click', ()=>trainNeuralNet(true));
+    document.getElementById('trainNowBtnMobile')?.addEventListener('click', ()=>trainNeuralNet(true));
+    document.getElementById('resetDataBtnDesktop')?.addEventListener('click', resetToDefault);
+    document.getElementById('resetDataBtnMobile')?.addEventListener('click', resetToDefault);
+    exportBtn.addEventListener('click', exportData);
+    importFileInput.addEventListener('change', e=>{ if(e.target.files.length) importData(e.target.files[0]); e.target.value=''; });
     
     window.addEventListener('DOMContentLoaded', async () => {
         loadTopicsFromStorage();
-        renderPairsList();
+        renderAllPairsLists();
         await trainNeuralNet(true);
         setMode('text');
         sendBtn.addEventListener('click', sendMessage);
         userInput.addEventListener('keypress', e=>{ if(e.key==='Enter') sendMessage(); });
-        addPairBtn.addEventListener('click', ()=>{ let q=newQuestionInput.value.trim(), a=newAnswerInput.value.trim(); if(q&&a) addOrUpdateTopic(q,a); newQuestionInput.value=""; newAnswerInput.value=""; });
-        trainNowBtn.addEventListener('click', ()=>trainNeuralNet(true));
-        resetDataBtn.addEventListener('click', resetToDefault);
-        exportBtn.addEventListener('click', exportData);
-        importFileInput.addEventListener('change', e=>{ if(e.target.files.length) importData(e.target.files[0]); e.target.value=''; });
     });
 </script>
 </body>
